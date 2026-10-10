@@ -4,6 +4,8 @@ export const BRAND = {
   slogan: "IN TO THE INFINITE HEIGHT",
   logoSrc: "/assets/brand/mierag-logo.png",
   logoAlt: "MIERAG INTERIOR AND ALL FINISHING WORKS emblem",
+  phone: "Phone to be supplied",
+  email: "Email to be supplied",
 } as const;
 
 export const NAV_ITEMS: { href: string; label: string; index: string }[] = [
