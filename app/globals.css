@@ -1,26 +1,216 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ivory: #f4f0e8;
+  --surface: #fffcf7;
+  --ink: #14110f;
+  --muted: #6f6860;
+  --line: #d8d0c4;
+  --brand: #c8102e;
+  --gold: #d4a017;
+  --gold-bright: #e8c547;
+  --success: #2f6b4f;
+  --warning: #9a6b12;
+  --error: #a31b2b;
+  --paper: #f4f0e8;
+  --night: #14110f;
+  --background: var(--ivory);
+  --foreground: var(--ink);
+}
+
+html[data-theme="dark"] {
+  --ivory: #12100e;
+  --surface: #1b1714;
+  --ink: #f3eee6;
+  --muted: #b5ab9f;
+  --line: #3a332c;
+  --background: #12100e;
+  --foreground: #f3eee6;
+  color-scheme: dark;
 }
 
 @theme inline {
+  --color-ivory: var(--ivory);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-paper: var(--paper);
+  --color-night: var(--night);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-cormorant);
+  --font-ethiopic: var(--font-ethiopic);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background: var(--ivory);
+  color: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-outfit), var(--font-ethiopic), sans-serif;
+  min-height: 100%;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.font-display {
+  font-family: var(--font-cormorant), Georgia, serif;
+}
+
+.font-ethiopic {
+  font-family: var(--font-ethiopic), var(--font-outfit), sans-serif;
+}
+
+.hairline {
+  background: var(--line);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.preview-credit {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.field {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.7rem 0.85rem;
+  color: var(--ink);
+}
+
+.field:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@keyframes scroll-line {
+  from {
+    transform: scaleY(0.15);
+    opacity: 0.35;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.scroll-line {
+  transform-origin: top center;
+  animation: scroll-line 1.5s ease-in-out infinite alternate;
+}
+
+.shape-hero {
+  border-radius: 1.6rem 1.6rem 4.8rem 1.6rem;
+}
+
+.photo-notch {
+  border-radius: 0;
+  clip-path: url("#photo-notch");
+}
+
+.shape-a {
+  border-radius: 2.4rem 5.4rem 2rem 4.6rem;
+}
+
+.shape-b {
+  border-radius: 5rem 1.7rem 4.4rem 2.2rem;
+}
+
+.chapter-mark {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.chapter-index {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(3.25rem, 6vw, 4.5rem);
+  font-weight: 300;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: var(--brand);
+}
+
+.chapter-mark.on-dark .chapter-index {
+  color: var(--gold-bright);
+}
+
+.chapter-rule {
+  width: 3.5rem;
+  height: 1px;
+  margin-bottom: 0.7rem;
+  background: var(--gold);
+}
+
+.chapter-mark.on-dark .chapter-rule {
+  background: var(--gold-bright);
+}
+
+.chapter-label {
+  margin-bottom: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.chapter-mark.on-dark .chapter-label {
+  color: var(--paper);
+}
+
+@keyframes frame-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.frame-float {
+  animation: frame-float 6.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
