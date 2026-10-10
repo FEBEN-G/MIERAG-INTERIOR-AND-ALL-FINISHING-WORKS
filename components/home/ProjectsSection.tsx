@@ -24,11 +24,11 @@ export function ProjectsSection() {
   const recruiting = result?.data.filter((site) => site.isRecruiting).slice(0, 3) ?? [];
 
   return (
-    <section id="projects" className="bg-ivory px-6 py-24 md:px-10 md:py-32">
+    <section id="projects" className="bg-ivory px-4 py-16 sm:px-6 sm:py-24 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
         <SectionMark index="05" label={t.projects.eyebrow} />
         <div className="mt-6 grid gap-6 md:grid-cols-12">
-          <h2 className="font-display text-4xl font-light leading-none sm:text-5xl md:col-span-7 lg:text-6xl">
+          <h2 className="font-display text-3xl font-light leading-none text-balance sm:text-5xl md:col-span-7 lg:text-6xl">
             {copy.projectsTitle}
           </h2>
           <p className="max-w-md text-sm leading-7 text-muted md:col-span-5">{copy.projectsBody}</p>

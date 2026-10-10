@@ -15,7 +15,7 @@ export function Services() {
   const { t } = useI18n();
 
   return (
-    <section id="services" className="relative overflow-hidden bg-ivory px-6 pt-28 pb-20 md:px-10 md:pt-40 md:pb-28">
+    <section id="services" className="relative overflow-hidden bg-ivory px-4 pt-24 pb-16 sm:px-6 sm:pt-28 md:px-10 md:pt-40 md:pb-28">
       <motion.div
         className="mx-auto max-w-7xl"
         initial={{ opacity: 0, y: 28 }}
@@ -25,7 +25,7 @@ export function Services() {
       >
         <SectionMark index="01" label={t.services.eyebrow} />
         <div className="mt-6 grid gap-8 md:grid-cols-12">
-          <h2 className="font-display text-4xl font-light leading-none sm:text-5xl md:col-span-6 lg:text-6xl">
+          <h2 className="font-display text-3xl font-light leading-none sm:text-5xl md:col-span-6 lg:text-6xl">
             {t.services.title}
           </h2>
           <p className="max-w-md text-sm leading-7 text-muted md:col-span-5 md:col-start-8 md:mt-4">
@@ -52,7 +52,7 @@ export function Services() {
             >
               <div className={cn(imageRight ? "sm:order-1" : "sm:order-2 sm:text-right")}>
                 <span className="font-display text-4xl font-light text-ink/15">{service.number}</span>
-                <h3 className="mt-3 text-2xl tracking-tight">{item.title}</h3>
+                <h3 className="mt-3 text-xl tracking-tight text-balance sm:text-2xl">{item.title}</h3>
                 <p className={cn("mt-3 text-sm leading-7 text-muted", imageRight ? "max-w-sm" : "sm:ml-auto sm:max-w-sm")}>
                   {item.description}
                 </p>

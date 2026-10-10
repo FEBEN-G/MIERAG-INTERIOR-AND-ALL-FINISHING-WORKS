@@ -22,10 +22,10 @@ export function ProjectCard({ site }: { site: Site }) {
             className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
         </div>
-        <div className="mt-5 flex items-start justify-between gap-4">
+        <div className="mt-5 flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[11px] uppercase tracking-[0.16em] text-gold">{statusLabel(site.status)}</p>
-            <h3 className="mt-2 text-xl tracking-tight">{site.name}</h3>
+            <h3 className="mt-2 text-lg tracking-tight text-balance sm:text-xl">{site.name}</h3>
           </div>
           {site.isPreview ? (
             <span className="text-[10px] uppercase tracking-[0.16em] text-muted">Preview</span>

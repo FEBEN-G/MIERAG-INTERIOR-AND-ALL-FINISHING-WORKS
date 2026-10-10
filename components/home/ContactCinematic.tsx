@@ -73,9 +73,9 @@ export function ContactCinematic() {
         />
         <div className="absolute inset-0 bg-night/55" />
       </div>
-      <div className="relative z-10 flex min-h-[90svh] flex-col justify-end px-6 py-24 md:px-12">
+      <div className="relative z-10 flex min-h-[90svh] flex-col justify-end px-4 py-20 sm:px-6 md:px-12">
         <SectionMark index="06" label={t.nav.contact} tone="paper" className="contact-cta" />
-        <h2 className="mt-5 max-w-4xl font-display text-4xl font-light leading-[0.95] text-paper sm:text-5xl lg:text-6xl">
+        <h2 className="mt-5 max-w-4xl font-display text-3xl font-light leading-[0.95] text-balance text-paper sm:text-5xl lg:text-6xl">
           {words.map((word) => (
             <span key={word} className="mr-[0.22em] inline-block overflow-hidden">
               <span className="contact-line inline-block">{word}</span>

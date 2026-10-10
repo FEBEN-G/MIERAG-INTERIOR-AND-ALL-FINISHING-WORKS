@@ -26,7 +26,7 @@ export function NavOverlay({ open, onClose }: Props) {
           id="site-menu"
           role="menu"
           aria-label="Site navigation"
-          className="absolute top-[calc(100%+0.4rem)] right-0 z-[70] w-[min(18.5rem,calc(100vw-2rem))] origin-top-right overflow-hidden border border-paper/10 bg-night text-paper shadow-[0_18px_50px_rgba(20,17,15,0.28)]"
+          className="absolute top-[calc(100%+0.4rem)] right-0 z-[70] w-[min(18.5rem,calc(100vw-1.5rem))] origin-top-right overflow-hidden border border-paper/10 bg-night text-paper shadow-[0_18px_50px_rgba(20,17,15,0.28)] max-sm:fixed max-sm:top-[4.25rem] max-sm:right-3 max-sm:left-3 max-sm:w-auto"
           initial={reduce ? { opacity: 1 } : { opacity: 0, y: -8, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}

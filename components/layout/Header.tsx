@@ -73,19 +73,19 @@ export function Header({ tone = "auto", visible = true }: Props) {
           scrolled ? "bg-ivory/92 backdrop-blur-sm" : "bg-transparent",
         )}
       >
-        <div className="flex items-center justify-between px-5 py-4 md:px-10">
-          <Link href="/" className="flex min-w-0 items-center gap-3 sm:gap-4">
+        <div className="flex items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-5 sm:py-4 md:px-10">
+          <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-4">
             <Image
               src={BRAND.logoSrc}
               alt=""
               width={88}
               height={68}
               priority
-              className="h-14 w-auto shrink-0 md:h-16"
+              className="h-10 w-auto shrink-0 sm:h-14 md:h-16"
             />
             <span
               className={cn(
-                "max-w-[11rem] text-[10px] uppercase leading-snug tracking-[0.14em] sm:max-w-[16rem] sm:text-[11px] md:max-w-xs md:tracking-[0.16em]",
+                "hidden min-w-0 max-w-[9rem] text-[9px] uppercase leading-snug tracking-[0.12em] min-[480px]:block sm:max-w-[16rem] sm:text-[11px] md:max-w-xs md:tracking-[0.16em]",
                 inverted ? "text-paper" : "text-ink",
               )}
             >
@@ -123,7 +123,7 @@ export function Header({ tone = "auto", visible = true }: Props) {
               );
             })}
           </nav>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setLocale(locale === "en" ? "am" : "en")}

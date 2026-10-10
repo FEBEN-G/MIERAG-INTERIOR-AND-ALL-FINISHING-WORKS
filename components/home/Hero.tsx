@@ -62,7 +62,7 @@ export function Hero({ ready }: { ready: boolean }) {
   }, [ready]);
 
   return (
-    <section ref={rootRef} className="relative h-[100svh] min-h-[640px] overflow-hidden bg-night">
+    <section ref={rootRef} className="relative h-[100svh] min-h-[560px] overflow-hidden bg-night">
       <div className="hero-mask absolute inset-0 overflow-hidden">
         <Image
           src={images.hero.src}
@@ -73,26 +73,26 @@ export function Hero({ ready }: { ready: boolean }) {
           className="hero-photo object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-night/80 via-night/20 to-night/25" />
-      <div className="hero-content absolute inset-0 z-10 flex flex-col justify-end px-6 pb-24 pt-28 md:px-14 md:pb-20">
+      <div className="hero-content absolute inset-0 z-10 flex flex-col justify-end px-4 pt-24 pb-16 sm:px-6 sm:pb-24 md:px-14 md:pb-20">
         <p className="hero-copy text-[11px] uppercase tracking-[0.28em] text-gold">{BRAND.shortName}</p>
-        <h1 className="mt-6 max-w-5xl font-display text-4xl font-light leading-[0.95] text-paper sm:text-5xl md:text-6xl lg:text-7xl">
+        <h1 className="mt-4 max-w-full font-display text-[2.15rem] font-light leading-[0.95] text-paper min-[420px]:text-4xl sm:mt-6 sm:text-5xl md:text-6xl lg:text-7xl">
           {copy.heroLines.map((line) => (
             <span key={line} className="block overflow-hidden">
               <span className="hero-line inline-block">{line}</span>
             </span>
           ))}
         </h1>
-        <p className="hero-copy mt-6 max-w-md text-sm leading-7 text-paper/80">{copy.heroSupport}</p>
-        <div className="hero-copy mt-10 flex flex-col gap-3 sm:flex-row">
-          <ButtonLink href="/gallery" variant="light">
+        <p className="hero-copy mt-5 max-w-md text-sm leading-7 text-paper/80 sm:mt-6">{copy.heroSupport}</p>
+        <div className="hero-copy mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row">
+          <ButtonLink href="/gallery" variant="light" className="w-full sm:w-auto">
             Explore Our Work
           </ButtonLink>
-          <ButtonLink href="/projects" variant="ghost">
+          <ButtonLink href="/projects" variant="ghost" className="w-full sm:w-auto">
             Explore Projects
           </ButtonLink>
         </div>
       </div>
-      <div className="hero-copy absolute bottom-8 left-8 z-10 flex items-center gap-4 md:left-14">
+      <div className="hero-copy absolute bottom-8 left-8 z-10 hidden items-center gap-4 sm:flex md:left-14">
         <span className="scroll-line block h-14 w-px bg-paper" />
         <span className="text-[10px] uppercase tracking-[0.28em] text-paper/60">Scroll</span>
       </div>

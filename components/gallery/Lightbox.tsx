@@ -55,13 +55,13 @@ export function Lightbox({ items, index, onClose, onPrev, onNext }: Props) {
               Close
             </button>
           </div>
-          <div className="relative mx-auto flex min-h-0 w-full max-w-6xl flex-1 items-center px-5 pb-8">
+          <div className="relative mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col items-center px-3 pb-8 sm:flex-row sm:px-5">
             <button type="button" onClick={onPrev} className="min-h-11 min-w-11 text-sm">
               Prev
             </button>
             <motion.div
               key={item.id}
-              className="relative mx-4 aspect-[16/10] w-full overflow-hidden"
+            className="relative mx-0 mt-3 aspect-[4/5] w-full min-w-0 overflow-hidden sm:mx-4 sm:mt-0 sm:aspect-[16/10]"
               initial={reduce ? { opacity: 1 } : { opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
             >

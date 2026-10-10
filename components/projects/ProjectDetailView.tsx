@@ -36,10 +36,10 @@ export function ProjectDetailView({ id }: { id: string }) {
   }
 
   return (
-    <article className="px-6 pb-24 pt-28 md:px-10">
+    <article className="px-4 pt-24 pb-16 sm:px-6 sm:pt-28 md:px-10">
       <div className="mx-auto max-w-5xl">
         <p className="text-[11px] uppercase tracking-[0.16em] text-gold">{statusLabel(site.status)}</p>
-        <h1 className="mt-4 font-display text-4xl font-light sm:text-5xl">{site.name}</h1>
+        <h1 className="mt-4 font-display text-3xl font-light text-balance sm:text-5xl">{site.name}</h1>
         <p className="mt-4 text-muted">{site.address}</p>
         <div className="relative mt-10 aspect-[16/9] overflow-hidden">
           <Image src={site.coverImageUrl} alt={`${site.name} cover`} fill sizes="100vw" className="object-cover" />

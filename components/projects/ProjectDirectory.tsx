@@ -59,10 +59,10 @@ export function ProjectDirectory() {
   }
 
   return (
-    <div className="px-6 pb-24 pt-28 md:px-10">
+    <div className="px-4 pt-24 pb-16 sm:px-6 sm:pt-28 md:px-10">
       <div className="mx-auto max-w-7xl">
         <SectionMark index="05" label={t.projects.eyebrow} />
-        <h1 className="mt-5 max-w-4xl font-display text-4xl font-light sm:text-5xl lg:text-6xl">{copy.projectsTitle}</h1>
+        <h1 className="mt-5 max-w-4xl font-display text-3xl font-light text-balance sm:text-5xl lg:text-6xl">{copy.projectsTitle}</h1>
         <p className="mt-6 max-w-xl text-sm leading-7 text-muted">{copy.projectsBody}</p>
 
         {result ? (

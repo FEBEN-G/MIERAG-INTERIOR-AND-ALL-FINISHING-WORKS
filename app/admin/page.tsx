@@ -27,8 +27,8 @@ export default function AdminPage() {
   return (
     <div className="px-6 py-28 md:px-10">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="font-display text-4xl font-light">Applications</h1>
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <h1 className="font-display text-3xl font-light sm:text-4xl">Applications</h1>
           <Button
             variant="line"
             onClick={async () => {

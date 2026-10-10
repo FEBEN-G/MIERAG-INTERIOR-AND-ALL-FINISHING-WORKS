@@ -104,7 +104,7 @@ export function HireModal({ site, onClose }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="hire-title"
-            className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto bg-ivory p-6 md:p-8"
+            className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto bg-ivory p-4 sm:p-6 md:p-8"
             initial={reduce ? { opacity: 1 } : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}

@@ -59,7 +59,7 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
         priority
         className="intro-logo h-auto w-[128px] md:w-[168px]"
       />
-      <p className="intro-word mt-8 flex justify-center text-[15px] uppercase tracking-[0.42em] text-ink">
+      <p className="intro-word mt-8 flex max-w-[90vw] justify-center text-[13px] uppercase tracking-[0.18em] text-ink sm:text-[15px] sm:tracking-[0.42em]">
         {BRAND.shortName.split("").map((letter, index) => (
           <span key={`${letter}-${index}`} className="intro-letter inline-block">
             {letter}
@@ -67,7 +67,9 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
         ))}
       </p>
       <span className="intro-line mt-4 block h-px w-24 origin-center bg-gold" />
-      <p className="intro-slogan mt-4 text-[11px] uppercase tracking-[0.28em] text-gold">{BRAND.slogan}</p>
+      <p className="intro-slogan mt-4 max-w-[90vw] px-4 text-center text-[11px] uppercase tracking-[0.16em] text-gold sm:tracking-[0.28em]">
+        {BRAND.slogan}
+      </p>
     </div>
   );
 }

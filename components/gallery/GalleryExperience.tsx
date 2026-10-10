@@ -32,16 +32,16 @@ export function GalleryExperience() {
           sizes="100vw"
           className="object-cover opacity-70"
         />
-        <div className="relative z-10 flex min-h-[70svh] flex-col justify-end px-6 py-24 md:px-12">
+        <div className="relative z-10 flex min-h-[70svh] flex-col justify-end px-4 py-20 sm:px-6 md:px-12">
           <SectionMark index="03" label={t.gallery.eyebrow} tone="paper" />
-          <h1 className="mt-4 max-w-4xl font-display text-4xl font-light text-paper sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 max-w-full font-display text-3xl font-light text-balance text-paper sm:text-5xl lg:text-6xl">
             {copy.galleryTitle}
           </h1>
           <p className="mt-6 max-w-xl text-sm leading-7 text-paper/75">{copy.galleryBody}</p>
         </div>
       </section>
 
-      <section className="px-6 pt-24 pb-16 md:px-10 md:pt-32">
+      <section className="px-4 pt-16 pb-12 sm:px-6 sm:pt-24 md:px-10 md:pt-32">
         <div className="mx-auto flex max-w-7xl flex-wrap gap-2">
           {galleryCategories.map((item) => (
             <button

@@ -13,7 +13,7 @@ export function About() {
   const follow = [t.about.lines[2], t.about.lines[3]].join(" ");
 
   return (
-    <section id="about" className="bg-surface px-6 py-24 md:px-10 md:py-32">
+    <section id="about" className="overflow-hidden bg-surface px-4 py-16 sm:px-6 sm:py-24 md:px-10 md:py-32">
       <div className="mx-auto grid max-w-7xl items-start gap-10 lg:grid-cols-2 lg:gap-16">
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 16 }}
@@ -22,10 +22,10 @@ export function About() {
           transition={{ duration: 0.6 }}
         >
           <SectionMark index="02" label={t.about.eyebrow} />
-          <h2 className="mt-3 font-display text-4xl font-light leading-none sm:text-5xl lg:text-6xl">
+          <h2 className="mt-3 font-display text-3xl font-light leading-none sm:text-5xl lg:text-6xl">
             {t.about.eyebrow}
           </h2>
-          <p className="mt-6 max-w-md font-display text-2xl font-light leading-snug sm:text-3xl">
+          <p className="mt-6 max-w-md font-display text-xl font-light leading-snug text-balance sm:text-3xl">
             <span className="block">{lead}</span>
             <span className="block">{follow}</span>
           </p>
@@ -53,7 +53,7 @@ export function About() {
             />
           </figure>
           <figure
-            className="relative col-span-2 mt-16 aspect-[3/4] overflow-hidden sm:mt-24"
+            className="relative col-span-2 mt-8 aspect-[3/4] overflow-hidden sm:mt-24"
             style={{ clipPath: "url(#photo-notch)" }}
           >
             <Image

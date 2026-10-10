@@ -67,7 +67,7 @@ export function Portfolio() {
   }, []);
 
   return (
-    <section id="work" ref={rootRef} className="overflow-hidden bg-ivory px-6 py-24 md:px-10 md:py-32">
+    <section id="work" ref={rootRef} className="overflow-hidden bg-ivory px-4 py-16 sm:px-6 sm:py-24 md:px-10 md:py-32">
       <div className="portfolio-head mx-auto max-w-7xl">
         <div className="chapter-mark flex items-end gap-4">
           <span className="chapter-index" aria-hidden>
@@ -80,7 +80,7 @@ export function Portfolio() {
           </span>
         </div>
         <div className="mt-6 grid gap-6 md:grid-cols-12">
-          <h2 className="font-display text-4xl font-light leading-none sm:text-5xl md:col-span-6 lg:text-6xl">
+          <h2 className="font-display text-3xl font-light leading-none sm:text-5xl md:col-span-6 lg:text-6xl">
             {copy.portfolioTitle}
           </h2>
           <p className="max-w-md text-sm leading-7 text-muted md:col-span-5 md:col-start-8">{copy.portfolioBody}</p>
@@ -92,7 +92,7 @@ export function Portfolio() {
 
       <div className="mx-auto mt-16 grid max-w-7xl gap-x-8 gap-y-12 md:grid-cols-2">
         {featured.map((item, index) => (
-          <article key={item.id} className={cn("portfolio-item relative", index % 2 === 1 && "md:mt-20")}>
+          <article key={item.id} className={cn("portfolio-item relative min-w-0", index % 2 === 1 && "md:mt-20")}>
             <div className="portfolio-clip overflow-hidden">
               <div
                 className={cn(
