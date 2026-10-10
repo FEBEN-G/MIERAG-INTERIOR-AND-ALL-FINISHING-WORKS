@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { BRAND } from "@/lib/brand";
 import { copy } from "@/lib/data/copy";
 import { images } from "@/lib/assets";
 import { ButtonLink } from "@/components/ui/ButtonLink";
@@ -74,8 +73,7 @@ export function Hero({ ready }: { ready: boolean }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-night/80 via-night/20 to-night/25" />
       <div className="hero-content absolute inset-0 z-10 flex flex-col justify-end px-4 pt-24 pb-16 sm:px-6 sm:pb-24 md:px-14 md:pb-20">
-        <p className="hero-copy text-[11px] uppercase tracking-[0.28em] text-gold">{BRAND.shortName}</p>
-        <h1 className="mt-4 max-w-full font-display text-[2.15rem] font-light leading-[0.95] text-paper min-[420px]:text-4xl sm:mt-6 sm:text-5xl md:text-6xl lg:text-7xl">
+        <h1 className="max-w-full font-display text-[2.15rem] font-light leading-[0.95] text-paper min-[420px]:text-4xl sm:text-5xl md:text-6xl lg:text-7xl">
           {copy.heroLines.map((line) => (
             <span key={line} className="block overflow-hidden">
               <span className="hero-line inline-block">{line}</span>
