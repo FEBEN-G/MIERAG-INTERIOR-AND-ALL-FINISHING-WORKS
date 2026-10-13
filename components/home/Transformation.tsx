@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { copy } from "@/lib/data/copy";
 import { beforeAfterPairs } from "@/lib/data/gallery";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
-import { PreviewNote } from "@/components/ui/PreviewNote";
 import { SectionMark } from "@/components/ui/SectionMark";
 import { ease, registerGsap } from "@/lib/gsap";
 
@@ -38,10 +36,10 @@ export function Transformation() {
       <div className="mx-auto max-w-6xl">
         <SectionMark index="04" label={t.transform.eyebrow} className="transform-in" />
         <h2 className="transform-in mt-6 max-w-3xl font-display text-2xl font-light leading-none text-balance sm:text-4xl md:text-5xl">
-          {copy.transformTitle}
+          {t.transform.title}
         </h2>
         <div className="transform-in mt-6">
-          <PreviewNote>{copy.transformNote}</PreviewNote>
+          <p className="max-w-2xl text-sm text-ink/80">{t.transform.note}</p>
         </div>
         <div className="transform-in mt-12">
           <BeforeAfter pair={pair} />

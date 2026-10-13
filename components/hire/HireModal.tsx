@@ -10,6 +10,7 @@ import { validateApplication } from "@/lib/validation";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLockBody } from "@/hooks/useLockBody";
 import { Button } from "@/components/ui/ButtonLink";
+import { useI18n } from "@/components/i18n/LanguageProvider";
 import type { SkillCategory } from "@/types";
 
 type Props = {
@@ -35,6 +36,12 @@ export function HireModal({ site, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const { t } = useI18n();
+
+  function fieldMessage(code?: string) {
+    if (!code) return undefined;
+    return t.hire.errors[code as keyof typeof t.hire.errors] ?? code;
+  }
 
   useLockBody(Boolean(site));
   useFocusTrap(panelRef, Boolean(site));
@@ -76,13 +83,11 @@ export function HireModal({ site, onClose }: Props) {
     setFailure(null);
     try {
       await submitApplication(data);
-      setSuccess(
-        "Your application has been submitted successfully. The team will contact you using the phone number provided.",
-      );
+      setSuccess(t.hire.success);
     } catch (error) {
       const fields = (error as Error & { fields?: Record<string, string> }).fields;
       if (fields) setErrors(fields);
-      setFailure(error instanceof Error ? error.message : "The application could not be sent.");
+      setFailure(t.hire.fail);
     } finally {
       setSubmitting(false);
     }
@@ -98,7 +103,7 @@ export function HireModal({ site, onClose }: Props) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
         >
-          <button type="button" className="absolute inset-0" aria-label="Close application form" onClick={() => !submitting && onClose()} />
+          <button type="button" className="absolute inset-0" aria-label={t.hire.closeForm} onClick={() => !submitting && onClose()} />
           <motion.div
             ref={panelRef}
             role="dialog"
@@ -110,9 +115,9 @@ export function HireModal({ site, onClose }: Props) {
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.28 }}
           >
-            <p className="text-[11px] uppercase tracking-[0.2em] text-gold">HIRE / ቅጥር</p>
-            <h2 id="hire-title" className="mt-3 font-display text-3xl font-light">
-              Apply for this site
+            <p className="text-sm text-gold-ink">{t.projects.hire}</p>
+            <h2 id="hire-title" className="mt-3 font-display text-3xl leading-tight text-ink">
+              {t.hire.title}
             </h2>
             <p className="mt-3 text-sm text-muted">
               {site.name}
@@ -120,21 +125,19 @@ export function HireModal({ site, onClose }: Props) {
               {site.address}
             </p>
             {!isApiConfigured() ? (
-              <p className="mt-4 text-xs text-warning">
-                Preview mode: submissions are validated locally until the API is connected.
-              </p>
+              <p className="mt-4 text-sm text-ink">{t.hire.preview}</p>
             ) : null}
 
             {success ? (
               <div className="mt-8 space-y-6">
                 <p className="text-sm leading-7 text-success">{success}</p>
                 <Button onClick={onClose} variant="line">
-                  Close
+                  {t.hire.close}
                 </Button>
               </div>
             ) : (
               <form className="mt-8 space-y-5" onSubmit={onSubmit} noValidate>
-                <Field label="Full Name" error={errors.fullName}>
+                <Field label={t.hire.name} error={fieldMessage(errors.fullName)}>
                   <input
                     value={values.fullName}
                     onChange={(e) => setValues((v) => ({ ...v, fullName: e.target.value }))}
@@ -142,7 +145,7 @@ export function HireModal({ site, onClose }: Props) {
                     className="field"
                   />
                 </Field>
-                <Field label="Phone Number" error={errors.phoneNumber}>
+                <Field label={t.hire.phone} error={fieldMessage(errors.phoneNumber)}>
                   <input
                     value={values.phoneNumber}
                     onChange={(e) => setValues((v) => ({ ...v, phoneNumber: e.target.value }))}
@@ -151,21 +154,21 @@ export function HireModal({ site, onClose }: Props) {
                     className="field"
                   />
                 </Field>
-                <Field label="Skill Category" error={errors.skillCategoryId}>
+                <Field label={t.hire.skill} error={fieldMessage(errors.skillCategoryId)}>
                   <select
                     value={values.skillCategoryId}
                     onChange={(e) => setValues((v) => ({ ...v, skillCategoryId: e.target.value }))}
                     className="field"
                   >
-                    <option value="">Select a skill</option>
+                    <option value="">{t.hire.select}</option>
                     {skills.map((skill) => (
                       <option key={skill.id} value={skill.id}>
-                        {skill.name}
+                        {t.projects.skillNames[skill.slug as keyof typeof t.projects.skillNames] ?? skill.name}
                       </option>
                     ))}
                   </select>
                 </Field>
-                <Field label="Expected Daily Rate (ETB)" error={errors.expectedRate}>
+                <Field label={t.hire.rate} error={fieldMessage(errors.expectedRate)}>
                   <input
                     value={values.expectedRate}
                     onChange={(e) => setValues((v) => ({ ...v, expectedRate: e.target.value }))}
@@ -173,7 +176,7 @@ export function HireModal({ site, onClose }: Props) {
                     className="field"
                   />
                 </Field>
-                <Field label="Years of Experience" error={errors.experienceYears}>
+                <Field label={t.hire.years} error={fieldMessage(errors.experienceYears)}>
                   <input
                     value={values.experienceYears}
                     onChange={(e) => setValues((v) => ({ ...v, experienceYears: e.target.value }))}
@@ -181,7 +184,7 @@ export function HireModal({ site, onClose }: Props) {
                     className="field"
                   />
                 </Field>
-                <Field label="Professional Experience Details (optional)" error={errors.experienceDetails}>
+                <Field label={t.hire.details} error={fieldMessage(errors.experienceDetails)}>
                   <textarea
                     value={values.experienceDetails}
                     onChange={(e) => setValues((v) => ({ ...v, experienceDetails: e.target.value }))}
@@ -192,10 +195,10 @@ export function HireModal({ site, onClose }: Props) {
                 {failure ? <p className="text-sm text-error">{failure}</p> : null}
                 <div className="flex gap-3 pt-2">
                   <Button type="submit" disabled={submitting}>
-                    {submitting ? "Submitting…" : "Submit application"}
+                    {submitting ? t.hire.submitting : t.hire.submit}
                   </Button>
                   <Button variant="line" onClick={onClose} disabled={submitting}>
-                    Cancel
+                    {t.hire.cancel}
                   </Button>
                 </div>
               </form>
@@ -218,7 +221,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-[11px] uppercase tracking-[0.16em] text-muted">{label}</span>
+      <span className="text-sm text-ink/75">{label}</span>
       <div className="mt-2">{children}</div>
       {error ? <p className="mt-1 text-xs text-error">{error}</p> : null}
     </label>

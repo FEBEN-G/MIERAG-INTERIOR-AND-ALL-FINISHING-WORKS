@@ -28,7 +28,7 @@ export function Services() {
           <h2 className="font-display text-3xl font-light leading-none sm:text-5xl md:col-span-6 lg:text-6xl">
             {t.services.title}
           </h2>
-          <p className="max-w-md text-sm leading-7 text-muted md:col-span-5 md:col-start-8 md:mt-4">
+          <p className="max-w-md text-base leading-8 text-ink/85 md:col-span-5 md:col-start-8 md:mt-4">
             {t.services.body}
           </p>
         </div>
@@ -53,7 +53,7 @@ export function Services() {
               <div className={cn(imageRight ? "sm:order-1" : "sm:order-2 sm:text-right")}>
                 <span className="font-display text-4xl font-light text-ink/15">{service.number}</span>
                 <h3 className="mt-3 text-xl tracking-tight text-balance sm:text-2xl">{item.title}</h3>
-                <p className={cn("mt-3 text-sm leading-7 text-muted", imageRight ? "max-w-sm" : "sm:ml-auto sm:max-w-sm")}>
+                <p className={cn("mt-3 text-base leading-8 text-ink/85", imageRight ? "max-w-sm" : "sm:ml-auto sm:max-w-sm")}>
                   {item.description}
                 </p>
               </div>

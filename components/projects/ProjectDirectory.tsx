@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { copy } from "@/lib/data/copy";
 import { getSites, getSkills } from "@/lib/api/sites";
 import { SITE_STATUSES, type SiteListResponse, type SiteStatus, type SkillCategory } from "@/types";
-import { statusLabel } from "@/lib/utils";
 import { ProjectCard } from "./ProjectCard";
-import { PreviewNote } from "@/components/ui/PreviewNote";
 import { Button } from "@/components/ui/ButtonLink";
 import { SectionMark } from "@/components/ui/SectionMark";
 import { useI18n } from "@/components/i18n/LanguageProvider";
@@ -37,7 +34,7 @@ export function ProjectDirectory() {
         location: location || undefined,
       })
         .then(setResult)
-        .catch(() => setError("Projects could not be loaded."))
+        .catch(() => setError(t.projects.error))
         .finally(() => setLoading(false));
     }, 200);
     return () => window.clearTimeout(handle);
@@ -62,56 +59,53 @@ export function ProjectDirectory() {
     <div className="px-4 pt-24 pb-16 sm:px-6 sm:pt-28 md:px-10">
       <div className="mx-auto max-w-7xl">
         <SectionMark index="05" label={t.projects.eyebrow} />
-        <h1 className="mt-5 max-w-4xl font-display text-3xl font-light text-balance sm:text-5xl lg:text-6xl">{copy.projectsTitle}</h1>
-        <p className="mt-6 max-w-xl text-sm leading-7 text-muted">{copy.projectsBody}</p>
+        <h1 className="mt-5 max-w-4xl font-display text-3xl leading-tight text-balance text-ink sm:text-5xl lg:text-6xl">{t.projects.title}</h1>
+        <p className="mt-6 max-w-xl text-base text-ink/85">{t.projects.body}</p>
 
         {result ? (
           <dl className="mt-12 grid grid-cols-2 gap-6 border-y border-line py-8 md:grid-cols-4">
-            <Stat label="Listed sites" value={result.stats.total} />
-            <Stat label="Active" value={result.stats.active} />
-            <Stat label="Recruiting" value={result.stats.recruiting} />
-            <Stat label="Completed" value={result.stats.completed} />
+            <Stat label={t.projects.listed} value={result.stats.total} />
+            <Stat label={t.projects.activeStat} value={result.stats.active} />
+            <Stat label={t.projects.recruiting} value={result.stats.recruiting} />
+            <Stat label={t.projects.completedStat} value={result.stats.completed} />
           </dl>
         ) : null}
 
         {result?.meta.source === "preview" ? (
           <div className="mt-8">
-            <PreviewNote>
-              These counts and records come from preview data until the backend is connected. They are not live MIERAG
-              project statistics.
-            </PreviewNote>
+            <p className="text-sm text-ink/80">{t.projects.preview}</p>
           </div>
         ) : null}
 
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <label>
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted">Search</span>
+            <span className="text-sm text-ink/80">{t.projects.search}</span>
             <input value={search} onChange={(e) => setSearch(e.target.value)} className="field mt-2" />
           </label>
           <label>
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted">Status</span>
+            <span className="text-sm text-ink/80">{t.projects.status}</span>
             <select value={status} onChange={(e) => setStatus(e.target.value)} className="field mt-2">
-              <option value="">All</option>
+              <option value="">{t.projects.all}</option>
               {SITE_STATUSES.map((item) => (
                 <option key={item} value={item}>
-                  {statusLabel(item)}
+                  {t.status[item]}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted">Skill</span>
+            <span className="text-sm text-ink/80">{t.projects.skill}</span>
             <select value={skill} onChange={(e) => setSkill(e.target.value)} className="field mt-2">
-              <option value="">All</option>
+              <option value="">{t.projects.all}</option>
               {skills.map((item) => (
                 <option key={item.id} value={item.slug}>
-                  {item.name}
+                  {t.projects.skillNames[item.slug as keyof typeof t.projects.skillNames] ?? item.name}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            <span className="text-[11px] uppercase tracking-[0.16em] text-muted">Location</span>
+            <span className="text-sm text-ink/80">{t.projects.location}</span>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -127,19 +121,19 @@ export function ProjectDirectory() {
         </div>
         <div className="mt-4">
           <Button variant="line" onClick={clearFilters}>
-            Clear filters
+            {t.projects.clear}
           </Button>
         </div>
 
-        {loading ? <p className="mt-12 text-sm text-muted">Loading projects…</p> : null}
-        {error ? <p className="mt-12 text-sm text-error">{error}</p> : null}
+        {loading ? <p className="mt-12 text-sm text-ink/80">{t.projects.loading}</p> : null}
+        {error ? <p className="mt-12 text-sm text-error">{t.projects.error}</p> : null}
         {!loading && !error && result && result.data.length === 0 ? (
-          <p className="mt-12 text-sm text-muted">No projects match the current filters.</p>
+          <p className="mt-12 text-sm text-ink/80">{t.projects.empty}</p>
         ) : null}
 
         {active.length > 0 ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl font-light">Active construction projects</h2>
+            <h2 className="font-display text-3xl leading-tight text-ink">{t.projects.active}</h2>
             <div className="mt-10 grid gap-12 md:grid-cols-2">
               {active.map((site) => (
                 <ProjectCard key={site.id} site={site} />
@@ -150,7 +144,7 @@ export function ProjectDirectory() {
 
         {completed.length > 0 ? (
           <section className="mt-20">
-            <h2 className="font-display text-3xl font-light">Completed projects</h2>
+            <h2 className="font-display text-3xl leading-tight text-ink">{t.projects.completed}</h2>
             <div className="mt-10 grid gap-12 md:grid-cols-2">
               {completed.map((site) => (
                 <ProjectCard key={site.id} site={site} />

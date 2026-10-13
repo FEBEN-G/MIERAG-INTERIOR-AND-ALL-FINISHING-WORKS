@@ -12,10 +12,10 @@ type LanguageValue = {
 };
 
 const LanguageContext = createContext<LanguageValue | null>(null);
-const STORAGE_KEY = "mierag-locale";
+const STORAGE_KEY = "mierag-locale-v2";
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>("am");
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);

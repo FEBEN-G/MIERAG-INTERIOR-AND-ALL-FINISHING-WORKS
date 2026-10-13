@@ -3,11 +3,10 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { BRAND } from "@/lib/brand";
-import { copy } from "@/lib/data/copy";
-import { images } from "@/lib/assets";
-import { ButtonLink } from "@/components/ui/ButtonLink";
-import { SectionMark } from "@/components/ui/SectionMark";
 import { useI18n } from "@/components/i18n/LanguageProvider";
+import { images } from "@/lib/assets";
+import { ContactForm } from "./ContactForm";
+import { SectionMark } from "@/components/ui/SectionMark";
 import { ease, registerGsap } from "@/lib/gsap";
 
 export function ContactCinematic() {
@@ -59,7 +58,7 @@ export function ContactCinematic() {
     return () => ctx.revert();
   }, []);
 
-  const words = copy.contactTitle.split(" ");
+  const words = t.contact.title.split(" ");
 
   return (
     <section id="contact" ref={rootRef} className="relative min-h-[90svh] overflow-hidden bg-night">
@@ -71,29 +70,25 @@ export function ContactCinematic() {
           sizes="100vw"
           className="contact-photo object-cover"
         />
-        <div className="absolute inset-0 bg-night/55" />
+        <div className="absolute inset-0 bg-gradient-to-t from-night via-night/70 to-night/40" />
       </div>
       <div className="relative z-10 flex min-h-[90svh] flex-col justify-end px-4 py-20 sm:px-6 md:px-12">
         <SectionMark index="06" label={t.nav.contact} tone="paper" className="contact-cta" />
-        <h2 className="mt-5 max-w-4xl font-display text-3xl font-light leading-[0.95] text-balance text-paper sm:text-5xl lg:text-6xl">
+        <h2 className="on-photo mt-5 max-w-4xl font-display text-3xl leading-tight text-balance text-paper sm:text-5xl lg:text-6xl">
           {words.map((word) => (
             <span key={word} className="mr-[0.22em] inline-block overflow-hidden">
               <span className="contact-line inline-block">{word}</span>
             </span>
           ))}
         </h2>
-        <p className="contact-cta mt-8 max-w-lg text-[11px] uppercase tracking-[0.22em] text-gold">
+        <p className="on-photo contact-cta mt-8 max-w-lg text-sm text-paper">
           {BRAND.name}
         </p>
-        <p className="contact-cta mt-3 text-[12px] uppercase tracking-[0.28em] text-paper/80">
-          {BRAND.slogan}
+        <p className="on-photo contact-cta mt-2 text-sm text-gold-bright">
+          {t.hero.lines.join(" ")}
         </p>
-        <p className="contact-cta mt-6 max-w-md text-sm leading-7 text-paper/70">{copy.contactBody}</p>
-        <div className="contact-cta mt-10">
-          <ButtonLink href="/gallery#inquiry" variant="light">
-            Contact Us
-          </ButtonLink>
-        </div>
+        <p className="on-photo contact-cta mt-6 max-w-md text-base leading-8 text-paper">{t.contact.body}</p>
+        <ContactForm />
       </div>
     </section>
   );

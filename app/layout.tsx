@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: `%s · ${BRAND.shortName}`,
   },
   description:
-    "Interior finishing, exterior finishing, and construction finishing in Ethiopia — with a project directory for skilled professionals.",
+    "በኢትዮጵያ የውስጥ፣ የውጭ እና የግንባታ ማጠናቀቂያ ስራ፤ ለባለሙያ ሰራተኞችም የፕሮጀክት ማውጫ።",
   openGraph: {
     title: BRAND.name,
     description: BRAND.slogan,
@@ -48,10 +48,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
-      lang="en"
+      lang="am"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
       className={`${outfit.variable} ${cormorant.variable} ${ethiopic.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-ivory text-ink">
+      <body className="flex min-h-full flex-col bg-ivory text-ink" suppressHydrationWarning>
         <Script id="mierag-theme" strategy="beforeInteractive">
           {`try{var t=localStorage.getItem("mierag-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}`}
         </Script>

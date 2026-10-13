@@ -1,25 +1,43 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { copy } from "@/lib/data/copy";
-import { beforeAfterPairs, filterGallery, galleryCategories } from "@/lib/data/gallery";
+import { getPublishedPosts, toGalleryItem } from "@/lib/api/content";
+import { isApiConfigured } from "@/lib/api/client";
+import { beforeAfterPairs, filterGallery, galleryCategories, galleryItems, previewImageKeys } from "@/lib/data/gallery";
 import { images } from "@/lib/assets";
-import type { GalleryCategory } from "@/types";
+import type { GalleryCategory, GalleryItem } from "@/types";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
-import { PreviewNote } from "@/components/ui/PreviewNote";
 import { ButtonLink } from "@/components/ui/ButtonLink";
+import { RoomSlider } from "@/components/ui/RoomSlider";
 import { SectionMark } from "@/components/ui/SectionMark";
 import { useI18n } from "@/components/i18n/LanguageProvider";
-import { cn } from "@/lib/utils";
 import { Lightbox } from "./Lightbox";
 
 export function GalleryExperience() {
   const [category, setCategory] = useState<GalleryCategory>("all");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const items = useMemo(() => filterGallery(category), [category]);
+  const [catalog, setCatalog] = useState<GalleryItem[]>(galleryItems);
+  const items = useMemo(() => filterGallery(category, catalog), [category, catalog]);
+
+  useEffect(() => {
+    if (!isApiConfigured()) return;
+    getPublishedPosts()
+      .then((posts) => setCatalog(posts.map(toGalleryItem)))
+      .catch(() => undefined);
+  }, []);
   const { t } = useI18n();
+  const caption = useMemo(
+    () => (item: GalleryItem) => {
+      const key = previewImageKeys[item.image.src] ?? item.id;
+      const known = t.gallery.items[key as keyof typeof t.gallery.items];
+      return {
+        title: known?.title ?? item.title,
+        description: known?.description ?? item.description,
+      };
+    },
+    [t],
+  );
 
   return (
     <div>
@@ -32,12 +50,13 @@ export function GalleryExperience() {
           sizes="100vw"
           className="object-cover opacity-70"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-night via-night/60 to-night/30" />
         <div className="relative z-10 flex min-h-[70svh] flex-col justify-end px-4 py-20 sm:px-6 md:px-12">
           <SectionMark index="03" label={t.gallery.eyebrow} tone="paper" />
-          <h1 className="mt-4 max-w-full font-display text-3xl font-light text-balance text-paper sm:text-5xl lg:text-6xl">
-            {copy.galleryTitle}
+          <h1 className="on-photo mt-4 max-w-full font-display text-3xl leading-tight text-balance text-paper sm:text-5xl lg:text-6xl">
+            {t.gallery.title}
           </h1>
-          <p className="mt-6 max-w-xl text-sm leading-7 text-paper/75">{copy.galleryBody}</p>
+          <p className="on-photo mt-6 max-w-xl text-base leading-8 text-paper">{t.gallery.body}</p>
         </div>
       </section>
 
@@ -52,7 +71,7 @@ export function GalleryExperience() {
                 category === item.id ? "bg-ink text-ivory" : "border border-line text-ink"
               }`}
             >
-              {item.label}
+              {t.gallery.categories[item.id]}
             </button>
           ))}
         </div>
@@ -60,9 +79,9 @@ export function GalleryExperience() {
 
       <section className="px-6 pb-20 md:px-10">
         <div className="mx-auto max-w-6xl">
-          <h2 className="font-display text-3xl font-light">{copy.transformTitle}</h2>
+          <h2 className="font-display text-3xl leading-tight text-ink">{t.transform.title}</h2>
           <div className="mt-4">
-            <PreviewNote>{copy.transformNote}</PreviewNote>
+            <p className="max-w-2xl text-sm text-ink/80">{t.transform.note}</p>
           </div>
           <div className="mt-8">
             <BeforeAfter pair={beforeAfterPairs[0]} />
@@ -72,31 +91,16 @@ export function GalleryExperience() {
 
       <section className="px-6 pb-24 md:px-10">
         <div className="mx-auto max-w-7xl">
-          <PreviewNote>{copy.portfolioNote}</PreviewNote>
           {items.length === 0 ? (
-            <p className="mt-16 text-sm text-muted">No preview images are mapped to this category yet.</p>
+            <p className="mt-16 text-base text-ink/80">{t.gallery.empty}</p>
           ) : (
-            <div className="mt-12 columns-1 gap-6 md:columns-2 lg:columns-3">
-              <AnimatePresence mode="popLayout">
-                {items.map((item, index) => (
-                  <motion.button
-                    layout
-                    key={item.id}
-                    type="button"
-                    onClick={() => setOpenIndex(index)}
-                    className="mb-6 w-full break-inside-avoid text-left"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <div className={cn("relative aspect-[4/5] overflow-hidden", index % 3 === 0 ? "shape-a" : index % 3 === 1 ? "shape-b" : "shape-c")}>
-                      <Image src={item.image.src} alt={item.image.alt} fill sizes="33vw" className="object-cover" />
-                    </div>
-                    <p className="mt-3 text-sm">{item.title}</p>
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-muted">{item.category}</p>
-                  </motion.button>
-                ))}
-              </AnimatePresence>
+            <div className="mt-10">
+              <RoomSlider
+                items={items}
+                previousLabel={t.gallery.prev}
+                nextLabel={t.gallery.next}
+                caption={caption}
+              />
             </div>
           )}
         </div>
@@ -104,14 +108,13 @@ export function GalleryExperience() {
 
       <section id="inquiry" className="bg-night px-6 py-24 text-paper md:px-10">
         <div className="mx-auto max-w-4xl">
-          <h2 className="font-display text-3xl font-light sm:text-4xl md:text-5xl">Discuss a finishing commission.</h2>
-          <p className="mt-6 max-w-xl text-sm leading-7 text-paper/70">
-            Official contact channels will appear here once supplied. Until then, review current sites or return to the
-            studio introduction.
+          <h2 className="on-photo font-display text-3xl leading-tight text-paper sm:text-4xl md:text-5xl">{t.gallery.inquiryTitle}</h2>
+          <p className="on-photo mt-6 max-w-xl text-base leading-8 text-paper">
+            {t.gallery.inquiryBody}
           </p>
           <div className="mt-10">
             <ButtonLink href="/projects" variant="light">
-              Explore available projects
+              {t.gallery.inquiryCta}
             </ButtonLink>
           </div>
         </div>

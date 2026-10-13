@@ -1,9 +1,9 @@
 import type { ApiError } from "@/types";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+export const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
 
 export function isApiConfigured() {
-  return API_BASE.length > 0;
+  return process.env.NEXT_PUBLIC_API_URL !== undefined;
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -15,6 +15,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     },
     credentials: "include",
   });
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
 
   const body = (await response.json().catch(() => null)) as T | ApiError | null;
 

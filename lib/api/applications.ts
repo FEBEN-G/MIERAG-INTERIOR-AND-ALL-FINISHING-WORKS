@@ -29,6 +29,10 @@ export async function adminLogout() {
   return apiFetch<{ ok: boolean }>("/api/admin/auth/logout", { method: "POST" });
 }
 
+export async function getAdminSession() {
+  return apiFetch<{ data: { email: string; role: string } | null }>("/api/admin/session");
+}
+
 export async function getAdminMe() {
   return apiFetch<{ data: { email: string; role: string } }>("/api/admin/me");
 }

@@ -79,14 +79,14 @@ export function Header({ tone = "auto", visible = true }: Props) {
             className="inline-flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-gold"
           >
             <Phone size={12} strokeWidth={1.75} aria-hidden />
-            <span>{BRAND.phone}</span>
+            <span>{BRAND.phone.startsWith("+") ? BRAND.phone : t.contact.phonePending}</span>
           </a>
           <a
             href={BRAND.email.includes("@") ? `mailto:${BRAND.email}` : "#contact"}
             className="inline-flex max-w-[52vw] items-center gap-1.5 transition-colors hover:text-gold"
           >
             <Mail size={12} strokeWidth={1.75} aria-hidden />
-            <span className="truncate">{BRAND.email}</span>
+            <span className="truncate">{BRAND.email.includes("@") ? BRAND.email : t.contact.emailPending}</span>
           </a>
         </div>
         <div className="flex items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-5 sm:py-4 md:px-10">
@@ -98,6 +98,7 @@ export function Header({ tone = "auto", visible = true }: Props) {
               height={68}
               priority
               className="h-10 w-auto shrink-0 sm:h-14 md:h-16"
+              style={{ width: "auto" }}
             />
             <span
               className={cn(

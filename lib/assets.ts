@@ -1,81 +1,81 @@
 import type { PreviewImage } from "@/types";
 
-const credit = "Development preview photograph. Replace with commissioned MIERAG photography.";
+const credit = "የልማት ቅድመ እይታ ፎቶ። በእውነተኛ የMIERAG ፎቶ ይተኩ።";
 
 export const images = {
   hero: {
     src: "/assets/preview/hero.jpg",
-    alt: "Quiet contemporary living interior with layered materials and natural light",
+    alt: "የተደራረቡ ቁሳቁሶች እና የተፈጥሮ ብርሃን ያለው ዘመናዊ ሳሎን",
     credit,
   },
   intro: {
     src: "/assets/preview/intro.jpg",
-    alt: "Architectural interior corridor with refined finishes and linear light",
+    alt: "የተጠናቀቀ ማጠናቀቂያ እና ቀጥተኛ ብርሃን ያለው የውስጥ መተላለፊያ",
     credit,
   },
   philosophy: {
     src: "/assets/preview/philosophy.jpg",
-    alt: "Sculptural residential stair and volume in a finished interior",
+    alt: "በተጠናቀቀ የቤት ውስጥ ያለ የመኖሪያ ደረጃ",
     credit,
   },
   exterior: {
     src: "/assets/preview/exterior.jpg",
-    alt: "Contemporary house exterior with composed facade and landscape",
+    alt: "የተቀናበረ ፊት እና አካባቢ ያለው ዘመናዊ የቤት ውጭ ገጽታ",
     credit,
   },
   kitchen: {
     src: "/assets/preview/kitchen.jpg",
-    alt: "Kitchen interior with cabinetry, stone, and considered lighting",
+    alt: "ካቢኔ፣ ድንጋይ እና ብርሃን ያለው ኩሽና",
     credit,
   },
   bathroom: {
     src: "/assets/preview/bathroom.jpg",
-    alt: "Bathroom finishing with stone, tile, and restrained fixtures",
+    alt: "ድንጋይ፣ ሰድር እና እቃዎች ያሉት መታጠቢያ ቤት",
     credit,
   },
   living: {
     src: "/assets/preview/living.jpg",
-    alt: "Living space with layered textiles, timber, and architectural daylight",
+    alt: "ጨርቅ፣ እንጨት እና የቀን ብርሃን ያለው ሳሎን",
     credit,
   },
   ceiling: {
     src: "/assets/preview/ceiling.jpg",
-    alt: "Interior volume emphasizing ceiling planes and wall finishes",
+    alt: "የጣሪያ እና የግድግዳ ማጠናቀቂያ የሚታይበት ክፍል",
     credit,
   },
   flooring: {
     src: "/assets/preview/flooring.jpg",
-    alt: "Finished room interior highlighting floor and wall material continuity",
+    alt: "ወለሉ እና ግድግዳው በአንድ ቁሳቁስ የተጠናቀቁበት ክፍል",
     credit,
   },
   painting: {
     src: "/assets/preview/painting.jpg",
-    alt: "Painted interior wall surfaces with calm color and daylight",
+    alt: "ረጋ ያለ ቀለም እና የቀን ብርሃን ያለው ግድግዳ",
     credit,
   },
   tile: {
     src: "/assets/preview/tile.jpg",
-    alt: "Tiled wet-area interior with precise jointing and stone surfaces",
+    alt: "በትክክል የተሰራ መጋጠሚያ ያለው የእርጥበት ቦታ ሰድር",
     credit,
   },
   construction: {
     src: "/assets/preview/construction.jpg",
-    alt: "Unfinished structural interior prior to finishing works",
+    alt: "ማጠናቀቂያ ከመጀመሩ በፊት ያለ ያልተጠናቀቀ መዋቅር",
     credit,
   },
   facade: {
     src: "/assets/preview/facade.jpg",
-    alt: "Modern architectural exterior massing and facade composition",
+    alt: "ዘመናዊ የሕንፃ ፊት እና የውጭ ቅርጽ",
     credit,
   },
   detail: {
     src: "/assets/preview/detail.jpg",
-    alt: "Residential interior detail with furniture and finished surfaces",
+    alt: "የቤት እቃ እና የተጠናቀቁ ገጽታዎች ያሉት የውስጥ ዝርዝር",
     credit,
   },
   galleryHero: {
     src: "/assets/preview/gallery-hero.jpg",
-    alt: "Open contemporary residence with terrace and refined exterior finishing",
+    alt: "ረንዳ እና የተጠናቀቀ ውጭ ያለው ክፍት ዘመናዊ መኖሪያ",
     credit,
   },
 } satisfies Record<string, PreviewImage>;

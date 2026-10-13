@@ -77,11 +77,76 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-cormorant), Georgia, serif;
+  font-family: var(--font-cormorant), var(--font-ethiopic), Georgia, serif;
 }
 
-.font-ethiopic {
+html:not([data-theme="dark"]) .text-gold-ink {
+  color: #6b4e0a;
+}
+
+html[data-theme="dark"] .text-gold-ink {
+  color: var(--gold-bright);
+}
+
+html[lang="am"] body {
   font-family: var(--font-ethiopic), var(--font-outfit), sans-serif;
+}
+
+html[lang="am"] .font-display {
+  font-family: var(--font-ethiopic), var(--font-outfit), sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+html[lang="am"] p,
+html[lang="am"] li,
+html[lang="am"] label,
+html[lang="am"] button,
+html[lang="am"] a {
+  line-height: 1.7;
+}
+
+html[lang="am"] .uppercase,
+html[lang="am"] .chapter-label,
+html[lang="am"] .preview-credit,
+html[lang="am"] .site-label {
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-family: var(--font-ethiopic), var(--font-outfit), sans-serif;
+}
+
+html[lang="am"] .chapter-label {
+  font-size: 1rem;
+}
+
+html[lang="am"] nav a {
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+html[lang="am"] .admin-app,
+html[lang="am"] .admin-app .font-display,
+html[lang="am"] .admin-app p,
+html[lang="am"] .admin-app li,
+html[lang="am"] .admin-app button,
+html[lang="am"] .admin-app a,
+html[lang="am"] .admin-app label,
+html[lang="am"] .admin-app input,
+html[lang="am"] .admin-app textarea,
+html[lang="am"] .admin-app select {
+  font-family: var(--font-outfit), var(--font-ethiopic), sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.5;
+}
+
+html[lang="am"] .admin-app nav a {
+  font-size: 0.925rem;
+}
+
+.on-photo {
+  text-shadow: 0 1px 2px rgb(20 17 15 / 0.55), 0 8px 24px rgb(20 17 15 / 0.35);
 }
 
 .hairline {

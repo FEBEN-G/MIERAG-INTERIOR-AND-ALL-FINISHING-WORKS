@@ -2,11 +2,11 @@ export function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function formatDate(value?: string | null) {
-  if (!value) return "To be confirmed";
+export function formatDate(value?: string | null, pending = "To be confirmed", locale: "en" | "am" = "en") {
+  if (!value) return pending;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "To be confirmed";
-  return new Intl.DateTimeFormat("en-GB", {
+  if (Number.isNaN(date.getTime())) return pending;
+  return new Intl.DateTimeFormat(locale === "am" ? "am-ET" : "en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -22,13 +22,22 @@ export function formatEtb(value?: number | null) {
   }).format(value);
 }
 
-export function compensationLabel(min?: number | null, max?: number | null, note?: string | null) {
+export function compensationLabel(
+  min?: number | null,
+  max?: number | null,
+  note?: string | null,
+  phrases?: { from: string; upTo: string; perDay: string; paySite: string },
+) {
+  const from = phrases?.from ?? "From";
+  const upTo = phrases?.upTo ?? "Up to";
+  const perDay = phrases?.perDay ?? "/ day";
+  const paySite = phrases?.paySite ?? "Compensation confirmed on site";
   if (min != null && max != null) {
-    return `${formatEtb(min)} – ${formatEtb(max)} / day`;
+    return `${formatEtb(min)} – ${formatEtb(max)} ${perDay}`;
   }
-  if (min != null) return `From ${formatEtb(min)} / day`;
-  if (max != null) return `Up to ${formatEtb(max)} / day`;
-  return note ?? "Compensation confirmed on site";
+  if (min != null) return `${from} ${formatEtb(min)} ${perDay}`;
+  if (max != null) return `${upTo} ${formatEtb(max)} ${perDay}`;
+  return note ?? paySite;
 }
 
 export function statusLabel(status: string) {

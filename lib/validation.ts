@@ -12,27 +12,27 @@ export function validateApplication(
   const skillCategoryId = values.skillCategoryId ?? "";
   const experienceDetails = (values.experienceDetails ?? "").trim();
 
-  if (fullName.length < 2) errors.fullName = "Enter your full name (at least 2 characters).";
-  if (fullName.length > 100) errors.fullName = "Name must be 100 characters or fewer.";
+  if (fullName.length < 2) errors.fullName = "nameShort";
+  if (fullName.length > 100) errors.fullName = "nameLong";
 
   if (!isValidEthiopianPhone(phoneNumber)) {
-    errors.phoneNumber = "Use an Ethiopian mobile number such as +2519XXXXXXXX or +2517XXXXXXXX.";
+    errors.phoneNumber = "phone";
   }
 
-  if (!skillCategoryId) errors.skillCategoryId = "Select a skill category.";
+  if (!skillCategoryId) errors.skillCategoryId = "skill";
 
   const expectedRate = Number(values.expectedRate);
   if (!Number.isInteger(expectedRate) || expectedRate < 0) {
-    errors.expectedRate = "Enter a non-negative daily rate in ETB.";
+    errors.expectedRate = "rate";
   }
 
   const experienceYears = Number(values.experienceYears);
   if (!Number.isInteger(experienceYears) || experienceYears < 0 || experienceYears > 50) {
-    errors.experienceYears = "Experience must be a whole number between 0 and 50.";
+    errors.experienceYears = "years";
   }
 
   if (experienceDetails.length > 2000) {
-    errors.experienceDetails = "Please keep this under 2000 characters.";
+    errors.experienceDetails = "details";
   }
 
   const normalizedPhone = normalizeEthiopianPhone(phoneNumber) ?? phoneNumber;

@@ -29,7 +29,7 @@ export function ButtonLink({
     <Link
       href={href}
       className={cn(
-        "inline-flex min-h-12 items-center justify-center px-6 text-[11px] uppercase tracking-[0.22em] transition-colors duration-300",
+        "site-label inline-flex min-h-12 items-center justify-center px-6 text-[11px] uppercase tracking-[0.22em] transition-colors duration-300",
         variants[variant],
         className,
       )}
@@ -60,7 +60,7 @@ export function Button({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-12 items-center justify-center px-6 text-[11px] uppercase tracking-[0.22em] transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50",
+        "site-label inline-flex min-h-12 items-center justify-center px-6 text-[11px] uppercase tracking-[0.22em] transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50",
         variants[variant],
         className,
       )}

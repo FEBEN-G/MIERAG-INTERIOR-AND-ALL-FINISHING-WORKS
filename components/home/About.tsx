@@ -29,7 +29,7 @@ export function About() {
             <span className="block">{lead}</span>
             <span className="block">{follow}</span>
           </p>
-          <p className="mt-5 max-w-md text-sm leading-8 text-muted">{t.about.body}</p>
+          <p className="mt-5 max-w-md text-base leading-8 text-ink/85">{t.about.body}</p>
           <p className="mt-6 max-w-md border-l border-brand pl-5 text-sm leading-7 text-ink">{t.about.statement}</p>
         </motion.div>
 
@@ -64,7 +64,7 @@ export function About() {
               className="object-cover"
             />
           </figure>
-          <p className="col-span-6 text-[10px] uppercase tracking-[0.16em] text-muted">{images.intro.credit}</p>
+          <p className="col-span-6 text-sm text-ink/70">{images.intro.credit}</p>
         </motion.div>
       </div>
     </section>

@@ -2,13 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { copy } from "@/lib/data/copy";
+import { useI18n } from "@/components/i18n/LanguageProvider";
 import { images } from "@/lib/assets";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ease, registerGsap } from "@/lib/gsap";
 
 export function Hero({ ready }: { ready: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!ready) return;
@@ -33,8 +34,7 @@ export function Hero({ ready }: { ready: boolean }) {
             { yPercent: 0, duration: 0.8, stagger: 0.08, ease },
             0.35,
           )
-          .fromTo(".hero-copy", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease }, 0.7)
-          .fromTo(".hero-nav-in", { opacity: 0 }, { opacity: 1, duration: 0.45, ease }, 0.85);
+          .fromTo(".hero-copy", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease }, 0.7);
       }
 
       if (!reduce) {
@@ -71,28 +71,28 @@ export function Hero({ ready }: { ready: boolean }) {
           sizes="100vw"
           className="hero-photo object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-night/80 via-night/20 to-night/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-night via-night/55 to-night/35" />
       <div className="hero-content absolute inset-0 z-10 flex flex-col justify-end px-4 pt-24 pb-16 sm:px-6 sm:pb-24 md:px-14 md:pb-20">
-        <h1 className="max-w-full font-display text-[2.15rem] font-light leading-[0.95] text-paper min-[420px]:text-4xl sm:text-5xl md:text-6xl lg:text-7xl">
-          {copy.heroLines.map((line) => (
+        <h1 className="on-photo max-w-full font-display text-[2.15rem] leading-[1.15] text-paper min-[420px]:text-4xl sm:text-5xl md:text-6xl lg:text-7xl">
+          {t.hero.lines.map((line) => (
             <span key={line} className="block overflow-hidden">
               <span className="hero-line inline-block">{line}</span>
             </span>
           ))}
         </h1>
-        <p className="hero-copy mt-5 max-w-md text-sm leading-7 text-paper/80 sm:mt-6">{copy.heroSupport}</p>
+        <p className="on-photo hero-copy mt-5 max-w-md text-base leading-8 text-paper sm:mt-6">{t.hero.support}</p>
         <div className="hero-copy mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row">
           <ButtonLink href="/gallery" variant="light" className="w-full sm:w-auto">
-            Explore Our Work
+            {t.hero.work}
           </ButtonLink>
           <ButtonLink href="/projects" variant="ghost" className="w-full sm:w-auto">
-            Explore Projects
+            {t.hero.projects}
           </ButtonLink>
         </div>
       </div>
       <div className="hero-copy absolute bottom-8 left-8 z-10 hidden items-center gap-4 sm:flex md:left-14">
         <span className="scroll-line block h-14 w-px bg-paper" />
-        <span className="text-[10px] uppercase tracking-[0.28em] text-paper/60">Scroll</span>
+        <span className="on-photo text-sm text-paper">{t.hero.scroll}</span>
       </div>
       </div>
     </section>

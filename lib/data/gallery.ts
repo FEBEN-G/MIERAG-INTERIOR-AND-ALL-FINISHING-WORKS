@@ -111,15 +111,31 @@ export const beforeAfterPairs: BeforeAfterPair[] = [
   },
 ];
 
-export function filterGallery(category: GalleryCategory) {
-  if (category === "all") return galleryItems;
+export function filterGallery(category: GalleryCategory, source: GalleryItem[] = galleryItems) {
+  if (category === "all") return source;
   if (category === "interior") {
-    return galleryItems.filter((item) =>
+    return source.filter((item) =>
       ["interior", "living", "kitchens", "bathrooms", "ceilings", "painting"].includes(item.category),
     );
   }
   if (category === "exterior") {
-    return galleryItems.filter((item) => item.category === "exterior");
+    return source.filter((item) => item.category === "exterior");
   }
-  return galleryItems.filter((item) => item.category === category);
+  return source.filter((item) => item.category === category);
 }
+
+export const previewImageKeys: Record<string, string> = {
+  "/assets/preview/living.jpg": "g-living-01",
+  "/assets/preview/kitchen.jpg": "g-kitchen-01",
+  "/assets/preview/bathroom.jpg": "g-bath-01",
+  "/assets/preview/exterior.jpg": "g-exterior-01",
+  "/assets/preview/intro.jpg": "g-interior-01",
+  "/assets/preview/ceiling.jpg": "g-ceiling-01",
+  "/assets/preview/flooring.jpg": "g-floor-01",
+  "/assets/preview/painting.jpg": "g-paint-01",
+  "/assets/preview/philosophy.jpg": "g-interior-02",
+  "/assets/preview/facade.jpg": "g-exterior-02",
+  "/assets/preview/detail.jpg": "g-living-02",
+  "/assets/preview/tile.jpg": "g-tile-01",
+};
+
