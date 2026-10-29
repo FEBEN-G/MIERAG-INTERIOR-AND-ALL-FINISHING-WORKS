@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from "react";
 
 export type Theme = "light" | "dark";
 
@@ -12,35 +12,41 @@ type ThemeValue = {
 
 const ThemeContext = createContext<ThemeValue | null>(null);
 const STORAGE_KEY = "mierag-theme";
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
+}
+
+function readTheme(): Theme {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
-  window.localStorage.setItem(STORAGE_KEY, theme);
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme);
+  } catch {}
+  listeners.forEach((listener) => listener());
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved === "dark" || saved === "light") {
-      setThemeState(saved);
-      document.documentElement.dataset.theme = saved;
-    }
-  }, []);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => "light" as Theme);
 
   const value = useMemo<ThemeValue>(
     () => ({
       theme,
-      setTheme: (next) => {
-        setThemeState(next);
-        applyTheme(next);
-      },
-      toggleTheme: () => {
-        const next = theme === "dark" ? "light" : "dark";
-        setThemeState(next);
-        applyTheme(next);
-      },
+      setTheme: applyTheme,
+      toggleTheme: () => applyTheme(theme === "dark" ? "light" : "dark"),
     }),
     [theme],
   );

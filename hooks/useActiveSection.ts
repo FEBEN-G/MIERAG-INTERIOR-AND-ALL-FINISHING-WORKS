@@ -15,20 +15,10 @@ function navFor(id: (typeof WATCH)[number]): ActiveNav {
 export function useActiveSection(): ActiveNav {
   const pathname = usePathname();
   const [section, setSection] = useState<ActiveNav>(null);
+  const isHome = pathname === "/";
 
   useEffect(() => {
-    if (pathname.startsWith("/gallery")) {
-      setSection("work");
-      return;
-    }
-    if (pathname.startsWith("/projects")) {
-      setSection("projects");
-      return;
-    }
-    if (pathname !== "/") {
-      setSection(null);
-      return;
-    }
+    if (!isHome) return;
 
     const update = () => {
       const line = Math.min(180, window.innerHeight * 0.28);
@@ -52,7 +42,9 @@ export function useActiveSection(): ActiveNav {
       window.removeEventListener("resize", update);
       window.removeEventListener("hashchange", update);
     };
-  }, [pathname]);
+  }, [isHome]);
 
-  return section;
+  if (pathname.startsWith("/gallery")) return "work";
+  if (pathname.startsWith("/projects")) return "projects";
+  return isHome ? section : null;
 }

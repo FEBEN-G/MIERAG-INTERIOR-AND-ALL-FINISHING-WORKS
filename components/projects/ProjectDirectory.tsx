@@ -16,7 +16,7 @@ export function ProjectDirectory() {
   const [result, setResult] = useState<SiteListResponse | null>(null);
   const [skills, setSkills] = useState<SkillCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const { t } = useI18n();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function ProjectDirectory() {
   useEffect(() => {
     const handle = window.setTimeout(() => {
       setLoading(true);
-      setError(null);
+      setError(false);
       getSites({
         search: search || undefined,
         status: (status || undefined) as SiteStatus | undefined,
@@ -34,7 +34,7 @@ export function ProjectDirectory() {
         location: location || undefined,
       })
         .then(setResult)
-        .catch(() => setError(t.projects.error))
+        .catch(() => setError(true))
         .finally(() => setLoading(false));
     }, 200);
     return () => window.clearTimeout(handle);

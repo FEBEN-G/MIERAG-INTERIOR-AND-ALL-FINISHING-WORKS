@@ -46,12 +46,20 @@ export function HireModal({ site, onClose }: Props) {
   useLockBody(Boolean(site));
   useFocusTrap(panelRef, Boolean(site));
 
+  // Reset the form when a different site opens the modal (adjusting state during render).
+  const [openSite, setOpenSite] = useState(site);
+  if (site !== openSite) {
+    setOpenSite(site);
+    if (site) {
+      setValues(empty);
+      setErrors({});
+      setSuccess(null);
+      setFailure(null);
+    }
+  }
+
   useEffect(() => {
     if (!site) return;
-    setValues(empty);
-    setErrors({});
-    setSuccess(null);
-    setFailure(null);
     getSkills().then(setSkills).catch(() => setSkills([]));
   }, [site]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { CinematicIntro } from "@/components/layout/CinematicIntro";
 import { About } from "./About";
 import { ContactCinematic } from "./ContactCinematic";
@@ -12,17 +12,25 @@ import { Transformation } from "./Transformation";
 
 const INTRO_KEY = "mierag-intro-v2";
 
-export function HomeExperience() {
-  const [ready, setReady] = useState(false);
+const noop = () => () => {};
 
-  useEffect(() => {
+function shouldSkipIntro() {
+  try {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || sessionStorage.getItem(INTRO_KEY) === "1") setReady(true);
-  }, []);
+    return reduce || sessionStorage.getItem(INTRO_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function HomeExperience() {
+  const skipIntro = useSyncExternalStore(noop, shouldSkipIntro, () => false);
+  const [introDone, setIntroDone] = useState(false);
+  const ready = skipIntro || introDone;
 
   return (
     <>
-      {ready ? null : <CinematicIntro onComplete={() => setReady(true)} />}
+      {ready ? null : <CinematicIntro onComplete={() => setIntroDone(true)} />}
       <Hero ready={ready} />
       <Services />
       <About />
