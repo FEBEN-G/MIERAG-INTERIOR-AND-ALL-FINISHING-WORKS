@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SiteStatus {
+  STRUCTURAL_WORK
+  ROUGH_IN
+  FINAL_FINISHING
+  COMPLETED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  CONTACTED
+  ACCEPTED
+  REJECTED
+}
+
+enum NoticeKind {
+  APPLICATION
+  INQUIRY
+}
+
+model Site {
+  id                     String              @id @default(uuid()) @db.Uuid
+  name                   String
+  description            String
+  status                 SiteStatus
+  address                String
+  latitude               Float?
+  longitude              Float?
+  estimatedDuration      String
+  startDate              DateTime?
+  expectedCompletionDate DateTime?
+  currentWorkerCount     Int                 @default(0)
+  coverImageUrl          String
+  compensationMin        Int?
+  compensationMax        Int?
+  compensationNote       String?
+  isPreview              Boolean             @default(true)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  requiredSkills         SiteRequiredSkill[]
+  applications           Application[]
+
+  @@map("sites")
+}
+
+model SkillCategory {
+  id           String              @id @default(uuid()) @db.Uuid
+  name         String
+  slug         String              @unique
+  isActive     Boolean             @default(true)
+  siteSkills   SiteRequiredSkill[]
+  applications Application[]
+
+  @@map("skill_categories")
+}
+
+model SiteRequiredSkill {
+  siteId          String        @db.Uuid
+  skillCategoryId String        @db.Uuid
+  workersNeeded   Int?
+  site            Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  skillCategory   SkillCategory @relation(fields: [skillCategoryId], references: [id], onDelete: Cascade)
+
+  @@id([siteId, skillCategoryId])
+  @@map("site_required_skills")
+}
+
+model Application {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  siteId               String                 @db.Uuid
+  fullName             String
+  phoneNumber          String
+  skillCategoryId      String                 @db.Uuid
+  expectedRate         Int
+  experienceYears      Int
+  experienceDetails    String?
+  status               ApplicationStatus      @default(PENDING)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  site                 Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  skillCategory        SkillCategory          @relation(fields: [skillCategoryId], references: [id])
+  notificationFailures NotificationFailure[]
+
+  @@index([siteId, phoneNumber])
+  @@map("applications")
+}
+
+model Admin {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+
+  @@map("admins")
+}
+
+model Post {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique
+  title       String
+  description String
+  category    String
+  imageUrl    String
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("posts")
+}
+
+model Inquiry {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime     @default(now())
+  notice    AdminNotice?
+
+  @@map("inquiries")
+}
+
+model AdminNotice {
+  id        String     @id @default(uuid()) @db.Uuid
+  kind      NoticeKind
+  title     String
+  body      String
+  read      Boolean    @default(false)
+  inquiryId String?    @unique @db.Uuid
+  inquiry   Inquiry?   @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+
+  @@index([read, createdAt])
+  @@map("admin_notices")
+}
+
+model NotificationFailure {
+  id            String      @id @default(uuid()) @db.Uuid
+  applicationId String      @db.Uuid
+  reason        String
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("notification_failures")
+}
