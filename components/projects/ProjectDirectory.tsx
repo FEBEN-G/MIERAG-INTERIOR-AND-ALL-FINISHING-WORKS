@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { getSites, getSkills } from "@/lib/api/sites";
+import { useEffect, useState } from "react";
+import { getAllSites, getSkills } from "@/lib/api/sites";
 import { SITE_STATUSES, type SiteListResponse, type SiteStatus, type SkillCategory } from "@/types";
 import { ProjectCard } from "./ProjectCard";
 import { Button } from "@/components/ui/ButtonLink";
@@ -15,6 +15,8 @@ export function ProjectDirectory() {
   const [location, setLocation] = useState("");
   const [result, setResult] = useState<SiteListResponse | null>(null);
   const [skills, setSkills] = useState<SkillCategory[]>([]);
+  // Every address seen so far, so typing a location does not shrink the suggestions.
+  const [locations, setLocations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { t } = useI18n();
@@ -27,23 +29,21 @@ export function ProjectDirectory() {
     const handle = window.setTimeout(() => {
       setLoading(true);
       setError(false);
-      getSites({
+      getAllSites({
         search: search || undefined,
         status: (status || undefined) as SiteStatus | undefined,
         skill: skill || undefined,
         location: location || undefined,
       })
-        .then(setResult)
+        .then((next) => {
+          setResult(next);
+          setLocations((previous) => mergeLocations(previous, next.data.map((site) => site.address)));
+        })
         .catch(() => setError(true))
         .finally(() => setLoading(false));
     }, 200);
     return () => window.clearTimeout(handle);
   }, [search, status, skill, location]);
-
-  const locations = useMemo(
-    () => Array.from(new Set((result?.data ?? []).map((site) => site.address))).sort(),
-    [result],
-  );
 
   const active = result?.data.filter((site) => site.status !== "COMPLETED") ?? [];
   const completed = result?.data.filter((site) => site.status === "COMPLETED") ?? [];
@@ -155,6 +155,11 @@ export function ProjectDirectory() {
       </div>
     </div>
   );
+}
+
+function mergeLocations(previous: string[], addresses: string[]) {
+  const merged = Array.from(new Set([...previous, ...addresses])).sort();
+  return merged.length === previous.length ? previous : merged;
 }
 
 function Stat({ label, value }: { label: string; value: number }) {

@@ -26,7 +26,7 @@ import {
   type SiteInput,
   type WorkPost,
 } from "@/lib/api/content";
-import { getSites, getSkills } from "@/lib/api/sites";
+import { getAllSites, getSkills } from "@/lib/api/sites";
 import { APPLICATION_STATUSES, SITE_STATUSES, type ApplicationStatus, type Site, type SiteStatus, type SkillCategory } from "@/types";
 import { BRAND } from "@/lib/brand";
 import { cn, formatDate } from "@/lib/utils";
@@ -101,7 +101,7 @@ function loadStudio(): Promise<StudioSnapshot> {
     const me = await getAdminMe();
     const notices = await getNotices();
     const posts = await getAdminPosts();
-    const siteResult = await getSites({ pageSize: 50 });
+    const siteResult = await getAllSites();
     const skills = await getSkills();
     const applications = await getAdminApplications();
     return {
@@ -297,7 +297,7 @@ export function AdminConsole() {
               onError={setError}
               onSaved={(message) => note(message)}
               onChange={async () => {
-                const result = await getSites({ pageSize: 50 });
+                const result = await getAllSites();
                 setSites(result.data);
               }}
             />

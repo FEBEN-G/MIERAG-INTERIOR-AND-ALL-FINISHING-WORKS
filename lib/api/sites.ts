@@ -25,6 +25,20 @@ export async function getSites(filters: SiteFilters = {}): Promise<SiteListRespo
   return apiFetch<SiteListResponse>(`/api/sites${queryString(filters)}`);
 }
 
+const MAX_PAGE_SIZE = 50;
+
+/** Fetches every matching site, following pages (the API returns at most 50 per page). */
+export async function getAllSites(filters: Omit<SiteFilters, "page" | "pageSize"> = {}): Promise<SiteListResponse> {
+  const first = await getSites({ ...filters, page: 1, pageSize: MAX_PAGE_SIZE });
+  const data = [...first.data];
+  for (let page = 2; data.length < first.meta.total; page += 1) {
+    const next = await getSites({ ...filters, page, pageSize: MAX_PAGE_SIZE });
+    if (next.data.length === 0) break;
+    data.push(...next.data);
+  }
+  return { ...first, data, meta: { ...first.meta, page: 1, pageSize: data.length } };
+}
+
 export async function getSite(id: string): Promise<Site> {
   if (!isApiConfigured()) {
     const site = getPreviewSite(id);
