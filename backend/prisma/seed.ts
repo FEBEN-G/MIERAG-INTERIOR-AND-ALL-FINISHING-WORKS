@@ -277,6 +277,8 @@ async function seedPosts() {
 async function main() {
   const skillsBySlug = await seedSkillCategories();
   await seedAdmin();
+  // SEED_PREVIEW=false creates only the skills and the admin, for a live site with real content.
+  if (process.env.SEED_PREVIEW === "false") return;
   await seedSites(skillsBySlug);
   await seedPosts();
 }

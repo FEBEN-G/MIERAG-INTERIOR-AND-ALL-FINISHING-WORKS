@@ -22,7 +22,10 @@ Premium architectural website and skilled-worker recruitment platform.
 │   ├── src/docs/        OpenAPI spec and Swagger UI (/api/docs)
 │   ├── prisma/          Schema, migrations, seed data
 │   └── tests/           Vitest unit tests
-├── docker-compose.yml   Local PostgreSQL
+├── deploy/              Caddy config and database backup script for the VPS
+├── docker-compose.yml   Local PostgreSQL for development
+├── docker-compose.prod.yml  Production stack: Postgres, API, website, Caddy
+├── DEPLOYMENT.md        Step-by-step VPS deployment guide
 └── .github/workflows/   CI: lint, type check and tests for both apps
 ```
 
@@ -85,6 +88,8 @@ The same checks run on every push and pull request through GitHub Actions.
 Applications are saved first. If SMTP is not configured, a `notification_failures` row is recorded and the applicant still receives success. Configure `SMTP_*` and `ADMIN_NOTIFICATION_EMAIL` to enable delivery.
 
 ## Deployment
+
+**Own server (VPS):** everything (database, API, website, HTTPS) runs with one Docker Compose file. Follow [DEPLOYMENT.md](DEPLOYMENT.md).
 
 **Website (Vercel):** import this repository and set the project **Root Directory** to `frontend`. Set `NEXT_PUBLIC_SITE_URL` to the public address. To connect the API, set `NEXT_PUBLIC_API_URL` to an empty value and `API_PROXY_URL` to the hosted API's address, so browser requests stay on the site's own domain (the admin login cookie depends on this).
 
