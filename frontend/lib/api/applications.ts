@@ -26,7 +26,7 @@ export async function adminLogin(email: string, password: string) {
 }
 
 export async function adminLogout() {
-  return apiFetch<{ ok: boolean }>("/api/admin/auth/logout", { method: "POST" });
+  return apiFetch<{ data: { ok: boolean } }>("/api/admin/auth/logout", { method: "POST" });
 }
 
 export async function getAdminSession() {
