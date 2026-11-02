@@ -81,7 +81,7 @@ cd backend && npx tsc --noEmit && npm test
 cd frontend && npm run lint && npx tsc --noEmit
 ```
 
-The same checks run on every push and pull request through GitHub Actions.
+The same checks run on every push and pull request through GitHub Actions, which also builds the Docker images and tests the full stack on real PostgreSQL, including uploads, simultaneous applications, and backup and restore.
 
 ## Email notifications
 

@@ -2,9 +2,11 @@
 
 import { useCallback, useId, useRef, useState } from "react";
 import { SiteImage } from "@/components/ui/SiteImage";
+import { useI18n } from "@/components/i18n/LanguageProvider";
 import type { BeforeAfterPair } from "@/types";
 
 export function BeforeAfter({ pair }: { pair: BeforeAfterPair }) {
+  const { t } = useI18n();
   const [value, setValue] = useState(50);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -53,18 +55,18 @@ export function BeforeAfter({ pair }: { pair: BeforeAfterPair }) {
         <div className="pointer-events-none absolute inset-y-0" style={{ left: `${value}%` }}>
           <div className="absolute inset-y-0 -ml-px w-px bg-paper" />
           <div className="absolute top-1/2 left-0 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center border border-paper bg-night text-paper">
-            <span className="sr-only">Drag to compare</span>
+            <span className="sr-only">{t.transform.slider}</span>
             <span aria-hidden className="text-xs">
               ‹ ›
             </span>
           </div>
         </div>
-        <span className="absolute bottom-4 left-4 text-[10px] uppercase tracking-[0.18em] text-paper">Before</span>
-        <span className="absolute right-4 bottom-4 text-[10px] uppercase tracking-[0.18em] text-paper">After</span>
+        <span className="absolute bottom-4 left-4 text-[10px] uppercase tracking-[0.18em] text-paper">{t.transform.before}</span>
+        <span className="absolute right-4 bottom-4 text-[10px] uppercase tracking-[0.18em] text-paper">{t.transform.after}</span>
       </div>
       <label className="block">
         <span id={labelId} className="sr-only">
-          Compare unfinished structure and finished space
+          {t.transform.slider}
         </span>
         <input
           type="range"

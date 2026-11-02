@@ -1,6 +1,7 @@
 import { SiteStatus } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../middleware/error";
+import { logger } from "../../utils/logger";
 import { notifyAdminOfApplication } from "../notifications/email";
 import { validateApplicationInput } from "./validation";
 
@@ -92,26 +93,20 @@ export async function createApplication(body: unknown) {
     return created;
   });
 
-  try {
-    await notifyAdminOfApplication({
-      applicationId: application.id,
-      applicantName: input.fullName,
-      phoneNumber: input.phoneNumber,
-      skillName: skill.name,
-      expectedRate: input.expectedRate,
-      experienceYears: input.experienceYears,
-      projectName: site.name,
-      location: site.address,
-      submittedAt: application.createdAt,
-    });
-  } catch {
-    await prisma.notificationFailure.create({
-      data: {
-        applicationId: application.id,
-        reason: "Notification processing failed",
-      },
-    });
-  }
+  // Sent in the background: a slow mail server must not keep the applicant waiting.
+  notifyAdminOfApplication({
+    applicationId: application.id,
+    applicantName: input.fullName,
+    phoneNumber: input.phoneNumber,
+    skillName: skill.name,
+    expectedRate: input.expectedRate,
+    experienceYears: input.experienceYears,
+    projectName: site.name,
+    location: site.address,
+    submittedAt: application.createdAt,
+  }).catch(() => {
+    logger.warn("Application notification failed", { applicationId: application.id });
+  });
 
   return {
     data: {

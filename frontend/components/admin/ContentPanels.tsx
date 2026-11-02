@@ -207,6 +207,7 @@ const TEXT_GROUPS = [
   { id: "gallery", label: "Gallery page" },
   { id: "hire", label: "Job application form" },
   { id: "status", label: "Project stages" },
+  { id: "errors", label: "Error pages" },
 ] as const;
 
 // These have their own sections in the studio.

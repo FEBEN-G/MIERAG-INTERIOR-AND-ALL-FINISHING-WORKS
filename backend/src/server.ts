@@ -18,6 +18,12 @@ async function shutdown(signal: string) {
   });
 }
 
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled promise rejection", {
+    error: reason instanceof Error ? reason.message : String(reason),
+  });
+});
+
 process.on("SIGTERM", () => {
   void shutdown("SIGTERM");
 });

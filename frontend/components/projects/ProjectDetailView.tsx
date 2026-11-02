@@ -27,7 +27,7 @@ export function ProjectDetailView({ id }: { id: string }) {
   useEffect(() => {
     getSite(id)
       .then(setSite)
-      .catch(() => setError(t.projects.notFound));
+      .catch((err: { status?: number }) => setError(err.status === 404 ? t.projects.notFound : t.projects.error));
   }, [id, t]);
 
   if (error) {

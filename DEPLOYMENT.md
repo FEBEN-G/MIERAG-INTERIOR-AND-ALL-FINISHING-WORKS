@@ -91,6 +91,7 @@ docker compose -f docker-compose.prod.yml exec -e SEED_RESET_ADMIN=true -e SEED_
 ## 7. Check it works
 
 ```bash
+./deploy/smoke-test.sh https://YOUR_DOMAIN   # read-only, safe on the live site
 curl https://YOUR_DOMAIN/api/health        # {"status":"ok"}
 docker compose -f docker-compose.prod.yml logs -f --tail=100
 ```
@@ -148,7 +149,7 @@ docker compose -f docker-compose.prod.yml exec -T backend tar -xzf - -C /app < b
 
 ## Notes
 
-- **Photos:** upload them in the admin studio (JPG, PNG, or WebP, up to 10 MB). They are stored in the `uploads` Docker volume, so they survive updates. They are served at full size, so resize very large photos (around 2000 px wide is plenty) before uploading. Removing or replacing a photo in the studio does not delete the old file from the server.
+- **Photos:** upload them in the admin studio (JPG, PNG, or WebP, up to 10 MB). They are stored in the `uploads` Docker volume, so they survive updates. They are resized to fit 2000 px and stripped of hidden data such as GPS location. Removing or replacing a photo in the studio does not delete the old file from the server.
 - **www:** to redirect `www.YOUR_DOMAIN`, add a DNS record for it and uncomment the block at the end of `deploy/Caddyfile`.
 - **API docs:** Swagger is available at `/api/docs`. It only describes the API; admin endpoints still require a login.
 - **Changing the domain:** update `DOMAIN` in `.env` and rebuild, because the site address is built into the website.

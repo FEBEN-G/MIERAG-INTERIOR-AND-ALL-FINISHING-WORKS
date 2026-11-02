@@ -2,6 +2,7 @@ import { z } from "zod";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../middleware/error";
 import { fieldErrors } from "../../utils/content";
+import { logger } from "../../utils/logger";
 import { notifyAdminOfInquiry } from "../notifications/email";
 
 const inquirySchema = z.object({
@@ -40,13 +41,16 @@ export async function createInquiry(body: unknown) {
     return created;
   });
 
-  await notifyAdminOfInquiry({
+  // Sent in the background: a slow mail server must not keep the visitor waiting.
+  notifyAdminOfInquiry({
     inquiryId: inquiry.id,
     name: inquiry.name,
     email: inquiry.email,
     phone: inquiry.phone,
     message: inquiry.message,
     submittedAt: inquiry.createdAt,
+  }).catch(() => {
+    logger.warn("Inquiry notification failed", { inquiryId: inquiry.id });
   });
 
   return {

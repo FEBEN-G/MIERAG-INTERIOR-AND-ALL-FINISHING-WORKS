@@ -5,6 +5,11 @@
 {$DOMAIN} {
 	encode zstd gzip
 
+	# Slightly above the API's 10 MB upload limit.
+	request_body {
+		max_size 12MB
+	}
+
 	# API requests go straight to Express; everything else is the Next.js site.
 	handle /api/* {
 		reverse_proxy backend:4000
@@ -17,6 +22,8 @@
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 }

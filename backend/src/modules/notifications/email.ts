@@ -15,6 +15,23 @@ type ApplicationNotification = {
   submittedAt: Date;
 };
 
+function createTransport() {
+  return nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_PORT === 465,
+    auth: env.SMTP_USER
+      ? {
+          user: env.SMTP_USER,
+          pass: env.SMTP_PASS,
+        }
+      : undefined,
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  });
+}
+
 function sanitizeFailureReason(reason: string): string {
   return reason.replace(/\s+/g, " ").trim().slice(0, 500);
 }
@@ -44,17 +61,7 @@ export async function notifyAdminOfInquiry(payload: InquiryNotification): Promis
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_PORT === 465,
-      auth: env.SMTP_USER
-        ? {
-            user: env.SMTP_USER,
-            pass: env.SMTP_PASS,
-          }
-        : undefined,
-    });
+    const transporter = createTransport();
 
     const text = [
       "A visitor sent a message from the website.",
@@ -88,17 +95,7 @@ export async function notifyAdminOfApplication(payload: ApplicationNotification)
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_PORT === 465,
-      auth: env.SMTP_USER
-        ? {
-            user: env.SMTP_USER,
-            pass: env.SMTP_PASS,
-          }
-        : undefined,
-    });
+    const transporter = createTransport();
 
     const submitted = payload.submittedAt.toISOString();
     const adminLink = `${env.FRONTEND_URL.replace(/\/$/, "")}/admin`;

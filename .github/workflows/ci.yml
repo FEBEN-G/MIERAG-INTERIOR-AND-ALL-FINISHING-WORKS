@@ -12,8 +12,8 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -28,8 +28,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -37,3 +37,52 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
+
+  # Builds the real images and tests the whole production stack on real PostgreSQL.
+  stack:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Write a test configuration
+        run: |
+          cat > .env <<'EOF'
+          DOMAIN=localhost
+          ACME_EMAIL=ci@example.com
+          POSTGRES_PASSWORD=ci0123456789abcdef
+          JWT_SECRET=ci0123456789abcdef0123456789abcdef0123456789
+          ADMIN_EMAIL=admin@example.com
+          ADMIN_PASSWORD=ci-admin-password-123
+          ADMIN_NOTIFICATION_EMAIL=admin@example.com
+          EOF
+          sed -i 's/^ *//' .env
+      - name: Build and start the stack
+        run: docker compose -f docker-compose.prod.yml up -d --build --wait --wait-timeout 300
+      - name: Seed the database
+        run: docker compose -f docker-compose.prod.yml exec -T backend npm run db:seed
+      - name: Smoke test
+        run: sh deploy/smoke-test.sh https://localhost
+      - name: End-to-end test
+        env:
+          ADMIN_EMAIL: admin@example.com
+          ADMIN_PASSWORD: ci-admin-password-123
+        run: bash deploy/stack-test.sh https://localhost | tee stack-test.log
+      - name: Uploaded photos survive a restart
+        run: |
+          url=$(sed -n 's/^UPLOADED_URL=//p' stack-test.log)
+          docker compose -f docker-compose.prod.yml up -d --force-recreate --wait --wait-timeout 120 backend
+          test "$(curl -k -s -o /dev/null -w '%{http_code}' "https://localhost$url")" = "200"
+      - name: Backup and restore
+        run: |
+          sh deploy/backup.sh
+          dump=$(ls backups/mierag-*.sql.gz)
+          test -s "$dump"
+          test -s "$(ls backups/uploads-*.tar.gz)"
+          compose="docker compose -f docker-compose.prod.yml exec -T postgres"
+          $compose createdb -U mierag restore_test
+          gunzip -c "$dump" | $compose psql -q -U mierag -d restore_test > /dev/null
+          count=$($compose psql -U mierag -d restore_test -tAc 'SELECT count(*) FROM services')
+          test "$count" -ge 1
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml logs --tail=80

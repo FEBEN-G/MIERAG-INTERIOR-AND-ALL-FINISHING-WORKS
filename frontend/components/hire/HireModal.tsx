@@ -94,9 +94,9 @@ export function HireModal({ site, onClose }: Props) {
       await submitApplication(data);
       setSuccess(t.hire.success);
     } catch (error) {
-      const fields = (error as Error & { fields?: Record<string, string> }).fields;
+      const { fields, status } = error as Error & { fields?: Record<string, string>; status?: number };
       if (fields) setErrors(fields);
-      setFailure(t.hire.fail);
+      setFailure(status === 409 ? t.hire.duplicate : status === 429 ? t.hire.busy : t.hire.fail);
     } finally {
       setSubmitting(false);
     }

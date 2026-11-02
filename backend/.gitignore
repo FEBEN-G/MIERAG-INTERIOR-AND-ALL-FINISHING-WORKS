@@ -4,4 +4,4 @@ dist
 *.log
 coverage
 .prisma
-uploads
+/uploads

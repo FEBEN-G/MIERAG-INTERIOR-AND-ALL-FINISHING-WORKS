@@ -213,6 +213,8 @@ export const en = {
     close: "Close",
     closeForm: "Close application form",
     fail: "The application could not be sent.",
+    duplicate: "You already applied for this project in the last 24 hours. The team has your application.",
+    busy: "Too many attempts from this connection. Please try again later.",
     errors: {
       nameShort: "Enter your full name (at least 2 characters).",
       nameLong: "Name must be 100 characters or fewer.",
@@ -222,6 +224,14 @@ export const en = {
       years: "Experience must be a whole number between 0 and 50.",
       details: "Please keep this under 2000 characters.",
     },
+  },
+  errors: {
+    notFoundTitle: "This page could not be found.",
+    notFoundBody: "The page may have moved, or the address may be mistyped.",
+    errorTitle: "Something went wrong.",
+    errorBody: "Please try again. If the problem continues, contact us.",
+    retry: "Try again",
+    home: "Back to home",
   },
   status: {
     STRUCTURAL_WORK: "Structural Work",
@@ -448,6 +458,8 @@ export const am: Dictionary = {
     close: "ዝጋ",
     closeForm: "የማመልከቻ ቅጽ ዝጋ",
     fail: "ማመልከቻውን መላክ አልተቻለም።",
+    duplicate: "ለዚህ ፕሮጀክት ባለፉት 24 ሰዓታት ውስጥ አስቀድመው አመልክተዋል። ማመልከቻዎ ደርሶናል።",
+    busy: "ከዚህ ግንኙነት ብዙ ሙከራዎች ተደርገዋል። እባክዎ ቆይተው እንደገና ይሞክሩ።",
     errors: {
       nameShort: "ሙሉ ስምዎን ያስገቡ (ቢያንስ ሁለት ፊደል)።",
       nameLong: "ስሙ ከ100 ፊደል መብለጥ የለበትም።",
@@ -457,6 +469,14 @@ export const am: Dictionary = {
       years: "የልምድ ዓመት ከ0 እስከ 50 ያለ ሙሉ ቁጥር መሆን አለበት።",
       details: "ይህ ከ2000 ፊደል በታች ይሁን።",
     },
+  },
+  errors: {
+    notFoundTitle: "ይህ ገጽ አልተገኘም።",
+    notFoundBody: "ገጹ ተዛውሮ ሊሆን ይችላል ወይም አድራሻው ተሳስቶ ሊሆን ይችላል።",
+    errorTitle: "የሆነ ችግር ተፈጥሯል።",
+    errorBody: "እባክዎ እንደገና ይሞክሩ። ችግሩ ከቀጠለ ያግኙን።",
+    retry: "እንደገና ይሞክሩ",
+    home: "ወደ መነሻ ይመለሱ",
   },
   status: {
     STRUCTURAL_WORK: "መዋቅራዊ ስራ",

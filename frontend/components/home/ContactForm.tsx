@@ -32,7 +32,7 @@ export function ContactForm() {
       setPhone("");
       setMessage("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.contact.sendError);
+      setError((err as { status?: number }).status === 429 ? t.hire.busy : t.contact.sendError);
     } finally {
       setLoading(false);
     }
@@ -44,10 +44,12 @@ export function ContactForm() {
 
   return (
     <form className="contact-cta mt-8 grid max-w-xl gap-3" onSubmit={onSubmit}>
-      <input className="field" placeholder={t.contact.name} value={name} onChange={(event) => setName(event.target.value)} required />
+      <input className="field" placeholder={t.contact.name} value={name} minLength={2} maxLength={100} onChange={(event) => setName(event.target.value)} required />
       <input className="field" type="email" placeholder={t.contact.email} value={email} onChange={(event) => setEmail(event.target.value)} required />
-      <input className="field" placeholder={t.contact.phone} value={phone} onChange={(event) => setPhone(event.target.value)} />
+      <input className="field" placeholder={t.contact.phone} value={phone} maxLength={30} onChange={(event) => setPhone(event.target.value)} />
       <textarea
+        minLength={10}
+        maxLength={2000}
         className="field min-h-28"
         placeholder={t.contact.message}
         value={message}

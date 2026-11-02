@@ -21,7 +21,9 @@ export const asyncHandler =
     Promise.resolve(handler(req, res, next)).catch(next);
   };
 
-export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
+  const where = { method: req.method, path: req.path };
+
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       error: {
@@ -63,13 +65,21 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     err instanceof Prisma.PrismaClientKnownRequestError ||
     err instanceof Prisma.PrismaClientValidationError
   ) {
-    logger.error("Database request failed");
+    // Prisma messages can quote submitted values, so log only the error code.
+    logger.error("Database request failed", {
+      ...where,
+      code: err instanceof Prisma.PrismaClientKnownRequestError ? err.code : "validation",
+    });
     return res.status(500).json({
       error: { message: "Internal server error" },
     });
   }
 
-  logger.error("Unhandled error");
+  logger.error("Unhandled error", {
+    ...where,
+    error: err instanceof Error ? err.message : String(err),
+    stack: err instanceof Error ? err.stack : undefined,
+  });
 
   return res.status(500).json({
     error: {

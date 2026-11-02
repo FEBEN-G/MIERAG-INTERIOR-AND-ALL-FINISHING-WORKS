@@ -30,6 +30,13 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   const body = (await response.json().catch(() => null)) as T | ApiError | null;
 
+  // The studio session ended (it lasts 8 hours): go to sign-in instead of showing a failed save.
+  if (response.status === 401 && path.startsWith("/api/admin/") && !path.startsWith("/api/admin/auth/") && typeof window !== "undefined" && window.location.pathname !== "/admin/login") {
+    // A full reload also discards the studio's data; this file has no router.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.assign("/admin/login");
+  }
+
   if (!response.ok) {
     const message =
       body && typeof body === "object" && "error" in body

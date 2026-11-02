@@ -161,6 +161,7 @@ export function AdminConsole() {
   const [applications, setApplications] = useState<AdminApplication[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(EMPTY_SETTINGS);
   const [services, setServices] = useState<AdminService[]>([]);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -186,8 +187,10 @@ export function AdminConsole() {
         setServices(studio.services);
         setReady(true);
       })
-      .catch(() => {
-        if (active) router.replace("/admin/login");
+      .catch((err: { status?: number }) => {
+        if (!active) return;
+        if (err.status === 401) router.replace("/admin/login");
+        else setLoadFailed(true);
       });
     return () => {
       active = false;
@@ -224,7 +227,9 @@ export function AdminConsole() {
   if (!ready) {
     return (
       <div className="admin-app grid min-h-svh place-items-center bg-ivory px-6 text-ink">
-        <p className="text-sm text-ink/70">Opening the studio…</p>
+        <p className="text-sm text-ink/70">
+          {loadFailed ? "The studio could not reach the server. Check your connection and refresh this page." : "Opening the studio…"}
+        </p>
       </div>
     );
   }
@@ -1055,7 +1060,7 @@ function ApplicationTable({
         </select>
       </div>
       {visible.length === 0 ? <Empty>No applications match this view.</Empty> : (
-        <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+        <div className="relative overflow-x-auto rounded-lg border border-line bg-surface">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-line text-ink/60">
               <tr>

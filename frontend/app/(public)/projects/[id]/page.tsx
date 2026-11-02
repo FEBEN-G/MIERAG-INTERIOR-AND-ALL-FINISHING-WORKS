@@ -12,7 +12,7 @@ export default function ProjectDetailPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="px-6 py-32 text-sm text-ink/80">Loading project…</p>}>
+    <Suspense fallback={<div className="min-h-[70svh]" />}>
       <ProjectDetailInner params={params} />
     </Suspense>
   );
