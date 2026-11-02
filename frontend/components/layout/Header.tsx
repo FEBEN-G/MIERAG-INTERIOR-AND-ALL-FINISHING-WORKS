@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mail, Moon, Phone, Sun } from "lucide-react";
@@ -9,7 +9,8 @@ import { BRAND, NAV_ITEMS } from "@/lib/brand";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { useActiveSection } from "@/hooks/useActiveSection";
-import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/lib/site-settings";
+import { cn, telHref } from "@/lib/utils";
 import { NavOverlay } from "./NavOverlay";
 
 type Props = {
@@ -24,6 +25,8 @@ export function Header({ tone = "auto", visible = true }: Props) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { locale, setLocale, t } = useI18n();
+  const { ready, settings } = useSiteSettings();
+  const { phone, email } = settings.contact;
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
   const overDarkMedia = pathname === "/" || pathname === "/gallery";
@@ -75,24 +78,24 @@ export function Header({ tone = "auto", visible = true }: Props) {
       >
         <div className="flex h-8 items-center justify-end gap-3 bg-night/80 px-3 text-[10px] tracking-[0.06em] text-paper backdrop-blur-sm sm:gap-5 sm:px-5 sm:text-[11px] md:px-10">
           <a
-            href={BRAND.phone.startsWith("+") ? `tel:${BRAND.phone.replace(/\s/g, "")}` : "#contact"}
+            href={phone ? telHref(phone) : "#contact"}
             className="inline-flex items-center gap-1.5 whitespace-nowrap transition-colors hover:text-gold"
           >
             <Phone size={12} strokeWidth={1.75} aria-hidden />
-            <span>{BRAND.phone.startsWith("+") ? BRAND.phone : t.contact.phonePending}</span>
+            <span>{phone || (ready ? t.contact.phonePending : null)}</span>
           </a>
           <a
-            href={BRAND.email.includes("@") ? `mailto:${BRAND.email}` : "#contact"}
+            href={email ? `mailto:${email}` : "#contact"}
             className="inline-flex max-w-[52vw] items-center gap-1.5 transition-colors hover:text-gold"
           >
             <Mail size={12} strokeWidth={1.75} aria-hidden />
-            <span className="truncate">{BRAND.email.includes("@") ? BRAND.email : t.contact.emailPending}</span>
+            <span className="truncate">{email || (ready ? t.contact.emailPending : null)}</span>
           </a>
         </div>
         <div className="flex items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-5 sm:py-4 md:px-10">
           <Link href="/" className="flex min-w-0 items-center gap-2 sm:gap-4">
-            <Image
-              src={BRAND.logoSrc}
+            <SiteImage
+              slot="logo"
               alt=""
               width={88}
               height={68}

@@ -22,6 +22,8 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci --include=dev && npx prisma generate && npm cache clean --force
 COPY --from=build /app/dist ./dist
+# Uploaded photos live here, on a volume; the API runs as the node user and must own it.
+RUN mkdir -p /app/uploads && chown node:node /app/uploads
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

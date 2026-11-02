@@ -35,8 +35,8 @@ Premium architectural website and skilled-worker recruitment platform.
 - Design Hub at `/gallery` with category filters, comparison slider, and lightbox.
 - Project Matrix at `/projects` with search, filters, detail pages, and HIRE / ቅጥር applications.
 - Amharic-first interface with an English toggle, plus light and dark themes.
-- Admin studio at `/admin` for photos, projects, applications, and messages.
-- Express + Prisma API for sites, skills, posts, inquiries, applications, admin auth, and email notifications.
+- Admin studio at `/admin`: upload and replace every site image (with restore default), and manage work photos, projects, skills, applications, messages, contact details, and the admin password.
+- Express + Prisma API for sites, skills, posts, settings, image uploads, inquiries, applications, admin auth, and email notifications.
 - Palette extracted from the supplied mark: red `#C8102E`, gold `#D4A017` / `#E8C547`, used as accents on warm ivory surfaces.
 
 ## Preview content

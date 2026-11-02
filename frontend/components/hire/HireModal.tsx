@@ -7,6 +7,7 @@ import { submitApplication } from "@/lib/api/applications";
 import { getSkills } from "@/lib/api/sites";
 import { isApiConfigured } from "@/lib/api/client";
 import { validateApplication } from "@/lib/validation";
+import { skillLabel } from "@/lib/skills";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLockBody } from "@/hooks/useLockBody";
 import { Button } from "@/components/ui/ButtonLink";
@@ -171,7 +172,7 @@ export function HireModal({ site, onClose }: Props) {
                     <option value="">{t.hire.select}</option>
                     {skills.map((skill) => (
                       <option key={skill.id} value={skill.id}>
-                        {t.projects.skillNames[skill.slug as keyof typeof t.projects.skillNames] ?? skill.name}
+                        {skillLabel(t, skill)}
                       </option>
                     ))}
                   </select>

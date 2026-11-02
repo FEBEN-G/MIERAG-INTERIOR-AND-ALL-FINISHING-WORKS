@@ -61,3 +61,12 @@ export function mapsHref(address: string, lat?: number | null, lng?: number | nu
   }
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
+
+/** Uploaded photos are served by the API, so they skip the Next.js image optimizer. */
+export function isUploadedImage(src: string) {
+  return src.startsWith("/api/uploads/");
+}
+
+export function telHref(phone: string) {
+  return `tel:${phone.replace(/[^\d+]/g, "")}`;
+}

@@ -47,6 +47,12 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     });
   }
 
+  if (err instanceof Error && "type" in err && err.type === "entity.too.large") {
+    return res.status(413).json({
+      error: { message: "That file is too large. The limit is 10 MB." },
+    });
+  }
+
   if (err instanceof SyntaxError && "body" in err) {
     return res.status(400).json({
       error: { message: "Invalid JSON body" },

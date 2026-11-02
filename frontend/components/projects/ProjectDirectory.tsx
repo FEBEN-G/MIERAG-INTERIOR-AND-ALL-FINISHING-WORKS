@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getAllSites, getSkills } from "@/lib/api/sites";
+import { skillLabel } from "@/lib/skills";
 import { SITE_STATUSES, type SiteListResponse, type SiteStatus, type SkillCategory } from "@/types";
 import { ProjectCard } from "./ProjectCard";
 import { Button } from "@/components/ui/ButtonLink";
@@ -99,7 +100,7 @@ export function ProjectDirectory() {
               <option value="">{t.projects.all}</option>
               {skills.map((item) => (
                 <option key={item.id} value={item.slug}>
-                  {t.projects.skillNames[item.slug as keyof typeof t.projects.skillNames] ?? item.name}
+                  {skillLabel(t, item)}
                 </option>
               ))}
             </select>

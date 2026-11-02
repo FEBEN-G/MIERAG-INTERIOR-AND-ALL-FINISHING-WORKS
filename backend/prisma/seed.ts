@@ -170,7 +170,7 @@ async function seedSkillCategories() {
   for (const skill of SKILL_CATEGORIES) {
     const row = await prisma.skillCategory.upsert({
       where: { slug: skill.slug },
-      update: { name: skill.name, isActive: true },
+      update: {},
       create: { name: skill.name, slug: skill.slug, isActive: true },
     });
     bySlug.set(skill.slug, { id: row.id, slug: row.slug });
@@ -191,7 +191,8 @@ async function seedAdmin() {
 
   await prisma.admin.upsert({
     where: { email },
-    update: { passwordHash, role: "ADMIN" },
+    // Keep a password changed in the studio unless a reset is requested.
+    update: process.env.SEED_RESET_ADMIN === "true" ? { passwordHash, role: "ADMIN" } : {},
     create: { email, passwordHash, role: "ADMIN" },
   });
 }
@@ -261,6 +262,8 @@ const PREVIEW_POSTS = [
 
 async function seedPosts() {
   for (const post of PREVIEW_POSTS) {
+    const existing = await prisma.post.findUnique({ where: { slug: post.slug }, select: { customized: true } });
+    if (existing?.customized) continue;
     await prisma.post.upsert({
       where: { slug: post.slug },
       update: {

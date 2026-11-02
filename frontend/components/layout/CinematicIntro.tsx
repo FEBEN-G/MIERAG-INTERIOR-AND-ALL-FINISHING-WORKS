@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { BRAND } from "@/lib/brand";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { ease, registerGsap } from "@/lib/gsap";
@@ -53,8 +53,8 @@ export function CinematicIntro({ onComplete }: { onComplete: () => void }) {
       role="dialog"
       aria-label="Brand introduction"
     >
-      <Image
-        src={BRAND.logoSrc}
+      <SiteImage
+        slot="logo"
         alt={BRAND.logoAlt}
         width={180}
         height={140}

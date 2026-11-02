@@ -57,3 +57,18 @@ export async function markNotice(noticeId: string, body: unknown) {
   });
   return { data: toNotice(row) };
 }
+
+export async function deleteNotice(noticeId: string) {
+  if (!UUID_PATTERN.test(noticeId)) throw new AppError(404, "Notice not found");
+  const existing = await prisma.adminNotice.findUnique({
+    where: { id: noticeId },
+    select: { id: true, inquiryId: true },
+  });
+  if (!existing) throw new AppError(404, "Notice not found");
+  // A contact message and its notice are one record; removing the inquiry cascades to the notice.
+  if (existing.inquiryId) {
+    await prisma.inquiry.delete({ where: { id: existing.inquiryId } });
+  } else {
+    await prisma.adminNotice.delete({ where: { id: noticeId } });
+  }
+}

@@ -1,4 +1,5 @@
 import { images } from "@/lib/assets";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 import type { BeforeAfterPair, GalleryCategory, GalleryItem } from "@/types";
 
 export const galleryCategories: { id: GalleryCategory; label: string }[] = [
@@ -124,18 +125,11 @@ export function filterGallery(category: GalleryCategory, source: GalleryItem[] =
   return source.filter((item) => item.category === category);
 }
 
-export const previewImageKeys: Record<string, string> = {
-  "/assets/preview/living.jpg": "g-living-01",
-  "/assets/preview/kitchen.jpg": "g-kitchen-01",
-  "/assets/preview/bathroom.jpg": "g-bath-01",
-  "/assets/preview/exterior.jpg": "g-exterior-01",
-  "/assets/preview/intro.jpg": "g-interior-01",
-  "/assets/preview/ceiling.jpg": "g-ceiling-01",
-  "/assets/preview/flooring.jpg": "g-floor-01",
-  "/assets/preview/painting.jpg": "g-paint-01",
-  "/assets/preview/philosophy.jpg": "g-interior-02",
-  "/assets/preview/facade.jpg": "g-exterior-02",
-  "/assets/preview/detail.jpg": "g-living-02",
-  "/assets/preview/tile.jpg": "g-tile-01",
-};
-
+export function galleryCaption(t: Dictionary, item: GalleryItem) {
+  const key = item.captionKey === null ? null : (item.captionKey ?? item.id);
+  const known = key ? t.gallery.items[key as keyof typeof t.gallery.items] : undefined;
+  return {
+    title: known?.title ?? item.title,
+    description: known?.description ?? item.description,
+  };
+}

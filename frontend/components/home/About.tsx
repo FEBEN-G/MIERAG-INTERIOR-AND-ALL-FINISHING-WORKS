@@ -1,14 +1,17 @@
 "use client";
 
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { motion, useReducedMotion } from "framer-motion";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { images } from "@/lib/assets";
+import { useSiteSettings } from "@/lib/site-settings";
 import { SectionMark } from "@/components/ui/SectionMark";
 
 export function About() {
   const { t } = useI18n();
   const reduce = useReducedMotion();
+  const { settings } = useSiteSettings();
+  const allReplaced = settings.images.about1 && settings.images.about2;
   const lead = [t.about.lines[0], t.about.lines[1]].join(" ");
   const follow = [t.about.lines[2], t.about.lines[3]].join(" ");
 
@@ -44,8 +47,8 @@ export function About() {
             className="relative col-span-4 aspect-[3/4] overflow-hidden"
             style={{ borderRadius: "46% 54% 42% 58% / 38% 48% 52% 62%" }}
           >
-            <Image
-              src={images.intro.src}
+            <SiteImage
+              slot="about1"
               alt={images.intro.alt}
               fill
               sizes="(max-width: 1024px) 55vw, 28vw"
@@ -56,15 +59,15 @@ export function About() {
             className="relative col-span-2 mt-8 aspect-[3/4] overflow-hidden sm:mt-24"
             style={{ clipPath: "url(#photo-notch)" }}
           >
-            <Image
-              src={images.detail.src}
+            <SiteImage
+              slot="about2"
               alt={images.detail.alt}
               fill
               sizes="(max-width: 1024px) 30vw, 16vw"
               className="object-cover"
             />
           </figure>
-          <p className="col-span-6 text-sm text-ink/70">{images.intro.credit}</p>
+          {allReplaced ? null : <p className="col-span-6 text-sm text-ink/70">{images.intro.credit}</p>}
         </motion.div>
       </div>
     </section>

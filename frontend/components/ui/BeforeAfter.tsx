@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useId, useRef, useState } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import type { BeforeAfterPair } from "@/types";
 
 export function BeforeAfter({ pair }: { pair: BeforeAfterPair }) {
@@ -43,12 +43,12 @@ export function BeforeAfter({ pair }: { pair: BeforeAfterPair }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <Image src={pair.after.src} alt={pair.after.alt} fill sizes="100vw" className="object-cover" />
+        <SiteImage slot="after" alt={pair.after.alt} fill sizes="100vw" className="object-cover" />
         <div
           className="absolute inset-0 overflow-hidden"
           style={{ clipPath: `inset(0 ${100 - value}% 0 0)` }}
         >
-          <Image src={pair.before.src} alt={pair.before.alt} fill sizes="100vw" className="object-cover" />
+          <SiteImage slot="before" alt={pair.before.alt} fill sizes="100vw" className="object-cover" />
         </div>
         <div className="pointer-events-none absolute inset-y-0" style={{ left: `${value}%` }}>
           <div className="absolute inset-y-0 -ml-px w-px bg-paper" />

@@ -9,3 +9,8 @@ export const listNotices = asyncHandler(async (_req: Request, res: Response) => 
 export const markNotice = asyncHandler(async (req: Request, res: Response) => {
   res.json(await noticesService.markNotice(req.params.noticeId as string, req.body));
 });
+
+export const deleteNotice = asyncHandler(async (req: Request, res: Response) => {
+  await noticesService.deleteNotice(req.params.noticeId as string);
+  res.status(204).send();
+});

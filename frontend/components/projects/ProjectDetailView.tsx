@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { isUploadedImage } from "@/lib/utils";
+import { skillLabel } from "@/lib/skills";
 import Link from "next/link";
 import type { Site } from "@/types";
 import { getSite } from "@/lib/api/sites";
@@ -50,7 +52,7 @@ export function ProjectDetailView({ id }: { id: string }) {
         <h1 className="mt-4 font-display text-3xl leading-tight text-balance text-ink sm:text-5xl">{site.name}</h1>
         <p className="mt-4 text-ink/80">{site.address}</p>
         <div className="relative mt-10 aspect-[16/9] overflow-hidden">
-          <Image src={site.coverImageUrl} alt={site.name} fill sizes="100vw" className="object-cover" />
+          <Image src={site.coverImageUrl} unoptimized={isUploadedImage(site.coverImageUrl)} alt={site.name} fill sizes="100vw" className="object-cover" />
         </div>
         <p className="mt-10 max-w-2xl text-base leading-8 text-ink/85">{site.description}</p>
         <dl className="mt-10 grid gap-6 md:grid-cols-2">
@@ -65,7 +67,7 @@ export function ProjectDetailView({ id }: { id: string }) {
           <Item
             label={t.projects.skills}
             value={site.requiredSkills
-              .map((skill) => t.projects.skillNames[skill.slug as keyof typeof t.projects.skillNames] ?? skill.name)
+              .map((skill) => skillLabel(t, skill))
               .join("፣ ")}
           />
         </dl>

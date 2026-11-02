@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
+import type { ImageSlot } from "@/lib/site-images";
 import type { ApplicationStatus, GalleryItem, Site, SiteStatus, SkillCategory } from "@/types";
 
 export const POST_CATEGORIES = [
@@ -22,6 +23,7 @@ export type WorkPost = {
   category: PostCategory;
   imageUrl: string;
   published: boolean;
+  customized: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -46,7 +48,23 @@ export type SiteInput = {
   compensationNote?: string;
   currentWorkerCount: number;
   isPreview: boolean;
-  skillCategoryIds: string[];
+  latitude: number | null;
+  longitude: number | null;
+  startDate: string | null;
+  expectedCompletionDate: string | null;
+  requiredSkills: { skillCategoryId: string; workersNeeded: number | null }[];
+};
+
+export type AdminSkill = SkillCategory & { isActive: boolean };
+
+export type SiteSettings = {
+  contact: { phone: string; email: string; address: string };
+  images: Partial<Record<ImageSlot, string>>;
+};
+
+export type SiteSettingsPatch = {
+  contact?: SiteSettings["contact"];
+  images?: Partial<Record<ImageSlot, string | null>>;
 };
 
 export type InquiryInput = {
@@ -78,6 +96,8 @@ export function toGalleryItem(post: WorkPost): GalleryItem {
     title: post.title,
     category: post.category,
     description: post.description,
+    // Built-in posts keep their translated captions until the admin edits them.
+    captionKey: post.customized ? null : post.slug,
     image: {
       src: post.imageUrl,
       alt: post.title,
@@ -120,6 +140,43 @@ export async function deleteSite(id: string) {
   await apiFetch<void>(`/api/admin/sites/${id}`, { method: "DELETE" });
 }
 
+export async function getAdminSkills() {
+  const result = await apiFetch<{ data: AdminSkill[] }>("/api/admin/skills");
+  return result.data;
+}
+
+export async function saveSkill(input: { name?: string; isActive?: boolean }, id?: string) {
+  const result = await apiFetch<{ data: AdminSkill }>(id ? `/api/admin/skills/${id}` : "/api/admin/skills", {
+    method: id ? "PATCH" : "POST",
+    body: JSON.stringify(input),
+  });
+  return result.data;
+}
+
+export async function getSiteSettings() {
+  const result = await apiFetch<{ data: SiteSettings }>("/api/settings");
+  return result.data;
+}
+
+export async function updateSiteSettings(patch: SiteSettingsPatch) {
+  const result = await apiFetch<{ data: SiteSettings }>("/api/admin/settings", {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+  return result.data;
+}
+
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+export async function uploadImage(file: File) {
+  const result = await apiFetch<{ data: { url: string } }>("/api/admin/uploads", {
+    method: "POST",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+  return result.data.url;
+}
+
 export async function submitInquiry(input: InquiryInput) {
   return apiFetch<{ data: { id: string; createdAt: string } }>("/api/inquiries", {
     method: "POST",
@@ -129,6 +186,10 @@ export async function submitInquiry(input: InquiryInput) {
 
 export async function getNotices() {
   return apiFetch<{ data: AdminNotice[]; meta: { unread: number } }>("/api/admin/notices");
+}
+
+export async function deleteNotice(id: string) {
+  await apiFetch<void>(`/api/admin/notices/${id}`, { method: "DELETE" });
 }
 
 export async function markNotice(id: string, read: boolean) {

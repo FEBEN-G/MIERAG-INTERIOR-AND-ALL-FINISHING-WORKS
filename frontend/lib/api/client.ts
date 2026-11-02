@@ -6,6 +6,14 @@ export function isApiConfigured() {
   return process.env.NEXT_PUBLIC_API_URL !== undefined;
 }
 
+/** The API's per-field messages when it sent them, otherwise its general message. */
+export function errorMessage(err: unknown, fallback: string) {
+  if (!(err instanceof Error)) return fallback;
+  const fields = (err as Error & { fields?: Record<string, string> }).fields;
+  const details = fields ? Object.values(fields) : [];
+  return details.length > 0 ? details.join(" ") : err.message || fallback;
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,

@@ -17,18 +17,19 @@ export const imageUrlSchema = z
   .min(1, "An image address is required.")
   .max(500, "The image address is too long.")
   .refine(
-    (value) => value.startsWith("/") || value.startsWith("https://images.unsplash.com/"),
+    (value) =>
+      (value.startsWith("/") && !value.startsWith("//")) || value.startsWith("https://images.unsplash.com/"),
     "Use a site image path, such as /assets/preview/living.jpg.",
   );
 
-export function slugFromTitle(title: string) {
+export function slugFromTitle(title: string, fallback = "post") {
   const base = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 48);
   const suffix = Math.random().toString(36).slice(2, 8);
-  return `${base || "post"}-${suffix}`;
+  return `${base || fallback}-${suffix}`;
 }
 
 export function fieldErrors(error: z.ZodError) {

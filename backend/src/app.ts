@@ -2,7 +2,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
 import { corsMiddleware } from "./config/cors";
-import { trustProxySetting } from "./config/env";
+import { env, trustProxySetting } from "./config/env";
 import { prisma } from "./config/prisma";
 import docsRouter from "./docs/router";
 import { errorHandler, notFoundHandler } from "./middleware/error";
@@ -11,8 +11,10 @@ import adminRoutes from "./modules/admin/routes";
 import applicationsRoutes from "./modules/applications/routes";
 import inquiriesRoutes from "./modules/inquiries/routes";
 import postsRoutes from "./modules/posts/routes";
+import settingsRoutes from "./modules/settings/routes";
 import sitesRoutes from "./modules/sites/routes";
 import skillsRoutes from "./modules/skills/routes";
+import { UPLOAD_URL_PREFIX } from "./modules/uploads/service";
 
 export function createApp() {
   const app = express();
@@ -29,6 +31,11 @@ export function createApp() {
   app.use(corsMiddleware);
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
+  // Uploaded photos are served before the rate limit: one page view can load many of them.
+  app.use(
+    UPLOAD_URL_PREFIX,
+    express.static(env.UPLOAD_DIR, { index: false, dotfiles: "deny", immutable: true, maxAge: "1y" }),
+  );
   app.use(globalRateLimit);
 
   app.get("/", (_req, res) => {
@@ -54,6 +61,7 @@ export function createApp() {
   app.use("/api/sites", sitesRoutes);
   app.use("/api/skills", skillsRoutes);
   app.use("/api/posts", postsRoutes);
+  app.use("/api/settings", settingsRoutes);
   app.use("/api/inquiries", inquiriesRoutes);
   app.use("/api/applications", applicationsRoutes);
   app.use("/api/admin", adminRoutes);

@@ -104,6 +104,8 @@ export type GalleryItem = {
   category: Exclude<GalleryCategory, "all">;
   description: string;
   location?: string;
+  /** Dictionary key for translated captions; null means show the title as written. Defaults to id. */
+  captionKey?: string | null;
   image: PreviewImage;
 };
 

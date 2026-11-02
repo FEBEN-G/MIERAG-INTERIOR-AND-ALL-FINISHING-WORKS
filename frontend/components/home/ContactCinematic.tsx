@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { BRAND } from "@/lib/brand";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { images } from "@/lib/assets";
+import { telHref } from "@/lib/utils";
+import { useSiteSettings } from "@/lib/site-settings";
 import { ContactForm } from "./ContactForm";
 import { SectionMark } from "@/components/ui/SectionMark";
 import { ease, registerGsap } from "@/lib/gsap";
@@ -12,6 +14,8 @@ import { ease, registerGsap } from "@/lib/gsap";
 export function ContactCinematic() {
   const rootRef = useRef<HTMLElement>(null);
   const { t } = useI18n();
+  const { ready, settings } = useSiteSettings();
+  const { phone, email, address } = settings.contact;
 
   useEffect(() => {
     const { gsap } = registerGsap();
@@ -63,8 +67,8 @@ export function ContactCinematic() {
   return (
     <section id="contact" ref={rootRef} className="relative min-h-[90svh] overflow-hidden bg-night">
       <div className="contact-mask absolute inset-0">
-        <Image
-          src={images.galleryHero.src}
+        <SiteImage
+          slot="contactBackground"
           alt={images.galleryHero.alt}
           fill
           sizes="100vw"
@@ -87,7 +91,15 @@ export function ContactCinematic() {
         <p className="on-photo contact-cta mt-2 text-sm text-gold-bright">
           {t.hero.lines.join(" ")}
         </p>
-        <p className="on-photo contact-cta mt-6 max-w-md text-base leading-8 text-paper">{t.contact.body}</p>
+        {phone || email || address ? (
+          <ul className="on-photo mt-6 max-w-md text-base leading-8 text-paper">
+            {phone ? <li><a href={telHref(phone)} className="hover:text-gold">{phone}</a></li> : null}
+            {email ? <li><a href={`mailto:${email}`} className="hover:text-gold">{email}</a></li> : null}
+            {address ? <li>{address}</li> : null}
+          </ul>
+        ) : ready ? (
+          <p className="on-photo contact-cta mt-6 max-w-md text-base leading-8 text-paper">{t.contact.body}</p>
+        ) : null}
         <ContactForm />
       </div>
     </section>

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { getPublishedPosts, toGalleryItem } from "@/lib/api/content";
 import { isApiConfigured } from "@/lib/api/client";
-import { beforeAfterPairs, filterGallery, galleryCategories, galleryItems, previewImageKeys } from "@/lib/data/gallery";
+import { beforeAfterPairs, filterGallery, galleryCaption, galleryCategories, galleryItems } from "@/lib/data/gallery";
+import { useSiteSettings } from "@/lib/site-settings";
 import { images } from "@/lib/assets";
 import type { GalleryCategory, GalleryItem } from "@/types";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
@@ -27,23 +28,17 @@ export function GalleryExperience() {
       .catch(() => undefined);
   }, []);
   const { t } = useI18n();
+  const { settings } = useSiteSettings();
   const caption = useMemo(
-    () => (item: GalleryItem) => {
-      const key = previewImageKeys[item.image.src] ?? item.id;
-      const known = t.gallery.items[key as keyof typeof t.gallery.items];
-      return {
-        title: known?.title ?? item.title,
-        description: known?.description ?? item.description,
-      };
-    },
+    () => (item: GalleryItem) => galleryCaption(t, item),
     [t],
   );
 
   return (
     <div>
       <section className="relative min-h-[70svh] overflow-hidden bg-night">
-        <Image
-          src={images.galleryHero.src}
+        <SiteImage
+          slot="galleryBanner"
           alt={images.galleryHero.alt}
           fill
           priority
@@ -81,7 +76,9 @@ export function GalleryExperience() {
         <div className="mx-auto max-w-6xl">
           <h2 className="font-display text-3xl leading-tight text-ink">{t.transform.title}</h2>
           <div className="mt-4">
-            <p className="max-w-2xl text-sm text-ink/80">{t.transform.note}</p>
+            {settings.images.before && settings.images.after ? null : (
+              <p className="max-w-2xl text-sm text-ink/80">{t.transform.note}</p>
+            )}
           </div>
           <div className="mt-8">
             <BeforeAfter pair={beforeAfterPairs[0]} />

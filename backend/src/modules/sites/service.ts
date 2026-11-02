@@ -236,7 +236,19 @@ const siteWriteSchema = z.object({
   compensationNote: z.string().trim().max(300).optional(),
   currentWorkerCount: z.number().int().nonnegative().max(500).default(0),
   isPreview: z.boolean().default(true),
-  skillCategoryIds: z.array(z.string().uuid()).max(12).default([]),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
+  startDate: z.coerce.date().nullable().optional(),
+  expectedCompletionDate: z.coerce.date().nullable().optional(),
+  requiredSkills: z
+    .array(
+      z.object({
+        skillCategoryId: z.string().uuid(),
+        workersNeeded: z.number().int().positive().max(500).nullable().optional(),
+      }),
+    )
+    .max(12)
+    .default([]),
 });
 
 async function parseSiteWrite(body: unknown) {
@@ -254,13 +266,21 @@ async function parseSiteWrite(body: unknown) {
       compensationMax: "Maximum rate must be greater than or equal to the minimum.",
     });
   }
-  if (input.skillCategoryIds.length > 0) {
-    const found = await prisma.skillCategory.count({
-      where: { id: { in: input.skillCategoryIds }, isActive: true },
+  const skillIds = input.requiredSkills.map((skill) => skill.skillCategoryId);
+  if (new Set(skillIds).size !== skillIds.length) {
+    throw new AppError(400, "Validation failed", { requiredSkills: "Each skill can be listed once." });
+  }
+  if (input.startDate && input.expectedCompletionDate && input.startDate > input.expectedCompletionDate) {
+    throw new AppError(400, "Validation failed", {
+      expectedCompletionDate: "The end date must be on or after the start date.",
     });
-    if (found !== input.skillCategoryIds.length) {
+  }
+  if (skillIds.length > 0) {
+    // Turned-off skills stay valid here so projects already using them can still be saved.
+    const found = await prisma.skillCategory.count({ where: { id: { in: skillIds } } });
+    if (found !== skillIds.length) {
       throw new AppError(400, "Validation failed", {
-        skillCategoryIds: "One or more skills are not available.",
+        requiredSkills: "One or more skills are not available.",
       });
     }
   }
@@ -280,7 +300,18 @@ function siteData(input: z.infer<typeof siteWriteSchema>) {
     compensationNote: input.compensationNote?.trim() || null,
     currentWorkerCount: input.currentWorkerCount,
     isPreview: input.isPreview,
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
+    startDate: input.startDate ?? null,
+    expectedCompletionDate: input.expectedCompletionDate ?? null,
   };
+}
+
+function requiredSkillRows(input: z.infer<typeof siteWriteSchema>) {
+  return input.requiredSkills.map(({ skillCategoryId, workersNeeded }) => ({
+    skillCategoryId,
+    workersNeeded: workersNeeded ?? null,
+  }));
 }
 
 export async function createSite(body: unknown) {
@@ -288,9 +319,7 @@ export async function createSite(body: unknown) {
   const site = await prisma.site.create({
     data: {
       ...siteData(input),
-      requiredSkills: {
-        create: input.skillCategoryIds.map((skillCategoryId) => ({ skillCategoryId })),
-      },
+      requiredSkills: { create: requiredSkillRows(input) },
     },
     include: siteInclude,
   });
@@ -303,23 +332,12 @@ export async function updateSite(siteId: string, body: unknown) {
   const existing = await prisma.site.findUnique({ where: { id: siteId }, select: { id: true } });
   if (!existing) throw new AppError(404, "Project not found");
   const site = await prisma.$transaction(async (tx) => {
-    // Keep the workers-needed count for skills that stay selected; the admin form does not edit it.
-    const current = await tx.siteRequiredSkill.findMany({
-      where: { siteId },
-      select: { skillCategoryId: true, workersNeeded: true },
-    });
-    const workersNeeded = new Map(current.map((row) => [row.skillCategoryId, row.workersNeeded]));
     await tx.siteRequiredSkill.deleteMany({ where: { siteId } });
     return tx.site.update({
       where: { id: siteId },
       data: {
         ...siteData(input),
-        requiredSkills: {
-          create: input.skillCategoryIds.map((skillCategoryId) => ({
-            skillCategoryId,
-            workersNeeded: workersNeeded.get(skillCategoryId) ?? null,
-          })),
-        },
+        requiredSkills: { create: requiredSkillRows(input) },
       },
       include: siteInclude,
     });

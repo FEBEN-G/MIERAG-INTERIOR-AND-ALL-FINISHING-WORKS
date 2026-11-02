@@ -41,6 +41,9 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       # Caddy is the single proxy in front of the API.
       TRUST_PROXY: "1"
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
 
   frontend:
     build:
@@ -72,5 +75,6 @@ services:
 
 volumes:
   pgdata:
+  uploads:
   caddy_data:
   caddy_config:

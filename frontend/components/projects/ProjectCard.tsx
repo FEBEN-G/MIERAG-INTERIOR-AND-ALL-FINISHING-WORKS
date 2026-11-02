@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { isUploadedImage } from "@/lib/utils";
+import { skillLabel } from "@/lib/skills";
 import Link from "next/link";
 import type { Site } from "@/types";
 import { useHire } from "@/components/hire/HireContext";
@@ -24,6 +26,7 @@ export function ProjectCard({ site }: { site: Site }) {
         <div className="relative aspect-[16/10] overflow-hidden bg-ink/5">
           <Image
             src={site.coverImageUrl}
+            unoptimized={isUploadedImage(site.coverImageUrl)}
             alt={site.name}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -59,7 +62,7 @@ export function ProjectCard({ site }: { site: Site }) {
       </dl>
       <p className="mt-4 text-sm text-ink/80">
         {site.requiredSkills
-          .map((skill) => t.projects.skillNames[skill.slug as keyof typeof t.projects.skillNames] ?? skill.name)
+          .map((skill) => skillLabel(t, skill))
           .join(" · ")}
       </p>
       <div className="mt-6">

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getPublishedPosts, toGalleryItem } from "@/lib/api/content";
 import { isApiConfigured } from "@/lib/api/client";
-import { galleryItems, previewImageKeys } from "@/lib/data/gallery";
+import { galleryItems, galleryCaption } from "@/lib/data/gallery";
 import type { GalleryItem } from "@/types";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { RoomSlider } from "@/components/ui/RoomSlider";
@@ -32,14 +32,7 @@ export function Portfolio() {
   }, []);
 
   const caption = useMemo(
-    () => (item: GalleryItem) => {
-      const key = previewImageKeys[item.image.src] ?? item.id;
-      const known = t.gallery.items[key as keyof typeof t.gallery.items];
-      return {
-        title: known?.title ?? item.title,
-        description: known?.description ?? item.description,
-      };
-    },
+    () => (item: GalleryItem) => galleryCaption(t, item),
     [t],
   );
 

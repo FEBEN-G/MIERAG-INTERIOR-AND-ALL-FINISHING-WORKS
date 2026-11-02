@@ -113,6 +113,7 @@ model Post {
   category    String
   imageUrl    String
   published   Boolean  @default(true)
+  customized  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -153,4 +154,12 @@ model NotificationFailure {
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@map("notification_failures")
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
 }

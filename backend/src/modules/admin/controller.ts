@@ -43,3 +43,16 @@ export const updateApplicationStatus = asyncHandler(async (req: Request, res: Re
   );
   res.json(result);
 });
+
+export const deleteApplication = asyncHandler(async (req: Request, res: Response) => {
+  await adminService.deleteApplication(req.params.applicationId as string);
+  res.status(204).send();
+});
+
+export const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.admin) {
+    throw new AppError(401, "Authentication required");
+  }
+  await adminService.changePassword(req.admin.id, req.body);
+  res.json({ data: { ok: true } });
+});

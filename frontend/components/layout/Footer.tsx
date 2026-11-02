@@ -1,20 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { BRAND, NAV_ITEMS } from "@/lib/brand";
 import { useI18n } from "@/components/i18n/LanguageProvider";
+import { useSiteSettings } from "@/lib/site-settings";
 
 const NAV_KEYS = ["home", "services", "work", "projects", "about", "contact"] as const;
 
 export function Footer() {
   const { t } = useI18n();
+  const { ready, settings } = useSiteSettings();
+  const details = Object.values(settings.contact).filter(Boolean).join(" · ");
 
   return (
     <footer className="border-t border-line bg-ivory px-4 py-14 sm:px-6 md:px-10">
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1.4fr_1fr]">
         <div>
-          <Image src={BRAND.logoSrc} alt={BRAND.logoAlt} width={64} height={48} className="h-12 w-auto" style={{ width: "auto" }} />
+          <SiteImage slot="logo" alt={BRAND.logoAlt} width={64} height={48} className="h-12 w-auto" style={{ width: "auto" }} />
           <p className="mt-6 max-w-sm text-sm leading-7 text-ink">{BRAND.name}</p>
           <p className="mt-3 max-w-full text-sm leading-relaxed text-gold-ink">{t.hero.lines.join(" ")}</p>
         </div>
@@ -26,7 +29,7 @@ export function Footer() {
           ))}
         </div>
       </div>
-      <p className="mx-auto mt-12 max-w-7xl text-sm leading-relaxed text-ink/75">{t.contact.footer}</p>
+      <p className="mx-auto mt-12 max-w-7xl text-sm leading-relaxed text-ink/75">{details || (ready ? t.contact.footer : null)}</p>
     </footer>
   );
 }

@@ -22,6 +22,7 @@ function toPost(row: {
   category: string;
   imageUrl: string;
   published: boolean;
+  customized: boolean;
   createdAt: Date;
   updatedAt: Date;
 }) {
@@ -33,6 +34,7 @@ function toPost(row: {
     category: row.category,
     imageUrl: row.imageUrl,
     published: row.published,
+    customized: row.customized,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -64,6 +66,7 @@ export async function createPost(body: unknown) {
       category: input.category,
       imageUrl: input.imageUrl,
       published: input.published,
+      customized: true,
     },
   });
   return { data: toPost(row) };
@@ -82,6 +85,7 @@ export async function updatePost(postId: string, body: unknown) {
       category: input.category,
       imageUrl: input.imageUrl,
       published: input.published,
+      customized: true,
     },
   });
   return { data: toPost(row) };

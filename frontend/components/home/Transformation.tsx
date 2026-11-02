@@ -4,12 +4,14 @@ import { useEffect, useRef } from "react";
 import { beforeAfterPairs } from "@/lib/data/gallery";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { BeforeAfter } from "@/components/ui/BeforeAfter";
+import { useSiteSettings } from "@/lib/site-settings";
 import { SectionMark } from "@/components/ui/SectionMark";
 import { ease, registerGsap } from "@/lib/gsap";
 
 export function Transformation() {
   const rootRef = useRef<HTMLElement>(null);
   const { t } = useI18n();
+  const { settings } = useSiteSettings();
 
   useEffect(() => {
     const { gsap } = registerGsap();
@@ -39,7 +41,9 @@ export function Transformation() {
           {t.transform.title}
         </h2>
         <div className="transform-in mt-6">
-          <p className="max-w-2xl text-sm text-ink/80">{t.transform.note}</p>
+          {settings.images.before && settings.images.after ? null : (
+            <p className="max-w-2xl text-sm text-ink/80">{t.transform.note}</p>
+          )}
         </div>
         <div className="transform-in mt-12">
           <BeforeAfter pair={pair} />

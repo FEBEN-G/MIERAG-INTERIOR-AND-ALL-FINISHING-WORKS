@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { motion, useReducedMotion } from "framer-motion";
 import { services } from "@/lib/data/services";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { PreviewNote } from "@/components/ui/PreviewNote";
+import type { ImageSlot } from "@/lib/site-images";
 import { SectionMark } from "@/components/ui/SectionMark";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +60,7 @@ export function Services() {
               </div>
               <div className={cn(imageRight ? "sm:order-2" : "sm:order-1")}>
                 <ServiceFrame
-                  src={service.image.src}
+                  slot={`service-${service.id}` as ImageSlot}
                   alt={service.image.alt}
                   shape={shapes[index % shapes.length]}
                   notch={index % 2 === 0}
@@ -75,13 +76,13 @@ export function Services() {
 }
 
 function ServiceFrame({
-  src,
+  slot,
   alt,
   shape,
   notch,
   delay,
 }: {
-  src: string;
+  slot: ImageSlot;
   alt: string;
   shape: (typeof shapes)[number];
   notch: boolean;
@@ -118,8 +119,8 @@ function ServiceFrame({
         )}
         style={notch ? { clipPath: "url(#photo-notch)" } : undefined}
       >
-        <Image
-          src={src}
+        <SiteImage
+          slot={slot}
           alt={alt}
           fill
           sizes="(max-width: 640px) 100vw, 46vw"

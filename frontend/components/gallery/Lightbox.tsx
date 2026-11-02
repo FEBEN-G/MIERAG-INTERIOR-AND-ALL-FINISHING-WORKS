@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { isUploadedImage } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { GalleryItem } from "@/types";
 import { useI18n } from "@/components/i18n/LanguageProvider";
@@ -67,7 +68,7 @@ export function Lightbox({ items, index, onClose, onPrev, onNext }: Props) {
               initial={reduce ? { opacity: 1 } : { opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
             >
-              <Image src={item.image.src} alt={item.image.alt} fill sizes="90vw" className="object-contain" />
+              <Image src={item.image.src} unoptimized={isUploadedImage(item.image.src)} alt={item.image.alt} fill sizes="90vw" className="object-contain" />
             </motion.div>
             <button type="button" onClick={onNext} className="min-h-11 min-w-11 text-sm text-paper">
               {t.gallery.next}

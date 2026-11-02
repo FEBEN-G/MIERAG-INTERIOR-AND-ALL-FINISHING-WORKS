@@ -37,6 +37,13 @@ export async function getAdminMe() {
   return apiFetch<{ data: { email: string; role: string } }>("/api/admin/me");
 }
 
+export async function changePassword(currentPassword: string, newPassword: string) {
+  await apiFetch("/api/admin/password", {
+    method: "POST",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 export type AdminApplication = {
   id: string;
   fullName: string;
@@ -53,6 +60,10 @@ export type AdminApplication = {
 export async function getAdminApplications() {
   const result = await apiFetch<{ data: AdminApplication[] }>("/api/admin/applications");
   return result.data;
+}
+
+export async function deleteApplication(id: string) {
+  await apiFetch<void>(`/api/admin/applications/${id}`, { method: "DELETE" });
 }
 
 export async function updateApplicationStatus(id: string, status: ApplicationStatus) {

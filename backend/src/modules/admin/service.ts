@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../middleware/error";
 import { signAdminToken } from "../../middleware/auth";
+import { fieldErrors } from "../../utils/content";
 import { updateApplicationStatusSchema } from "../applications/validation";
 
 const loginSchema = z.object({
@@ -158,4 +159,39 @@ export async function updateApplicationStatus(applicationId: string, body: unkno
   });
 
   return { data: toAdminApplication(row) };
+}
+
+export async function deleteApplication(applicationId: string) {
+  if (!UUID_PATTERN.test(applicationId)) {
+    throw new AppError(404, "Application not found");
+  }
+  const existing = await prisma.application.findUnique({
+    where: { id: applicationId },
+    select: { id: true },
+  });
+  if (!existing) {
+    throw new AppError(404, "Application not found");
+  }
+  await prisma.application.delete({ where: { id: applicationId } });
+}
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Enter your current password.").max(200),
+  newPassword: z.string().min(10, "Use at least 10 characters.").max(200),
+});
+
+export async function changePassword(adminId: string, body: unknown) {
+  const parsed = passwordSchema.safeParse(body);
+  if (!parsed.success) {
+    throw new AppError(400, "Validation failed", fieldErrors(parsed.error));
+  }
+  const admin = await prisma.admin.findUnique({ where: { id: adminId } });
+  const matches = admin && (await bcrypt.compare(parsed.data.currentPassword, admin.passwordHash));
+  if (!matches) {
+    throw new AppError(400, "Validation failed", { currentPassword: "That is not your current password." });
+  }
+  await prisma.admin.update({
+    where: { id: adminId },
+    data: { passwordHash: await bcrypt.hash(parsed.data.newPassword, 12) },
+  });
 }

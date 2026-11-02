@@ -79,7 +79,14 @@ docker compose -f docker-compose.prod.yml exec -e SEED_PREVIEW=false backend npm
 
 Then open `https://YOUR_DOMAIN/admin/login` and sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-Running the seed again resets the admin password to the value in `.env`, and resets the preview records (not your own projects, posts, or applications).
+Running the seed again keeps your admin password and any photo you edited in the studio, but it resets the preview projects and brings back preview photos you removed.
+
+Forgot the admin password? Set a new `ADMIN_PASSWORD` in `.env`, then:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d backend
+docker compose -f docker-compose.prod.yml exec -e SEED_RESET_ADMIN=true -e SEED_PREVIEW=false backend npm run db:seed
+```
 
 ## 7. Check it works
 
@@ -99,7 +106,7 @@ docker image prune -f
 
 ## Backups
 
-`deploy/backup.sh` writes a compressed database dump to `backups/` and keeps 14 days. Run it daily with cron (`crontab -e`):
+`deploy/backup.sh` saves a compressed database dump and all uploaded photos to `backups/` and keeps 14 days. Run it daily with cron (`crontab -e`):
 
 ```
 0 3 * * * cd /opt/mierag && ./deploy/backup.sh >> backups/backup.log 2>&1
@@ -107,11 +114,17 @@ docker image prune -f
 
 Copy the `backups/` folder off the server regularly (for example with `rsync` or your VPS provider's snapshots).
 
-Restore a dump:
+Restore the database:
 
 ```bash
 gunzip -c backups/mierag-YYYY-MM-DD-HHMM.sql.gz | \
   docker compose -f docker-compose.prod.yml exec -T postgres psql -U mierag -d mierag
+```
+
+Restore uploaded photos:
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T backend tar -xzf - -C /app < backups/uploads-YYYY-MM-DD-HHMM.tar.gz
 ```
 
 ## Useful commands
@@ -126,7 +139,7 @@ gunzip -c backups/mierag-YYYY-MM-DD-HHMM.sql.gz | \
 
 ## Notes
 
-- **Photos:** gallery posts and projects reference images by path. Add new photos under `frontend/public/assets/`, commit, pull on the server, and rebuild; then use the path (for example `/assets/projects/bole-villa.jpg`) in the admin studio.
+- **Photos:** upload them in the admin studio (JPG, PNG, or WebP, up to 10 MB). They are stored in the `uploads` Docker volume, so they survive updates. They are served at full size, so resize very large photos (around 2000 px wide is plenty) before uploading. Removing or replacing a photo in the studio does not delete the old file from the server.
 - **www:** to redirect `www.YOUR_DOMAIN`, add a DNS record for it and uncomment the block at the end of `deploy/Caddyfile`.
 - **API docs:** Swagger is available at `/api/docs`. It only describes the API; admin endpoints still require a login.
 - **Changing the domain:** update `DOMAIN` in `.env` and rebuild, because the site address is built into the website.

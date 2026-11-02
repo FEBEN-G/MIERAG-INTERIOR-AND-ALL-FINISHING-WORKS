@@ -31,6 +31,7 @@ export default function AdminLoginPage() {
     setError(null);
     try {
       await adminLogin(email.trim(), password);
+      setPassword("");
       router.replace("/admin");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in.");

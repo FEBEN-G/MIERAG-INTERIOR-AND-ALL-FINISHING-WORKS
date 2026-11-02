@@ -13,6 +13,7 @@ export const openApiDocument = {
     { name: "Skills", description: "Active skill categories" },
     { name: "Posts", description: "Public work posts" },
     { name: "Inquiries", description: "Visitor messages" },
+    { name: "Settings", description: "Public site settings" },
     { name: "Applications", description: "Public worker applications" },
     { name: "Admin", description: "Protected review tools" },
   ],
@@ -339,6 +340,64 @@ export const openApiDocument = {
         },
       },
     },
+    "/api/settings": {
+      get: {
+        tags: ["Settings"],
+        summary: "Public contact details and replaced site images",
+        responses: { "200": { description: "Settings" } },
+      },
+    },
+    "/api/admin/settings": {
+      patch: {
+        tags: ["Admin"],
+        summary: "Update contact details or site images (null restores the default image)",
+        security: [{ adminCookie: [] }],
+        responses: { "200": { description: "Updated settings" }, "400": { description: "Validation failed" } },
+      },
+    },
+    "/api/admin/uploads": {
+      post: {
+        tags: ["Admin"],
+        summary: "Upload a JPG, PNG, or WebP image (raw body, up to 10 MB)",
+        security: [{ adminCookie: [] }],
+        responses: {
+          "201": { description: "Uploaded; returns the image address" },
+          "413": { description: "File too large" },
+          "415": { description: "Not a supported image" },
+        },
+      },
+    },
+    "/api/admin/skills": {
+      get: {
+        tags: ["Admin"],
+        summary: "List all skill categories, including turned-off ones",
+        security: [{ adminCookie: [] }],
+        responses: { "200": { description: "Skills" } },
+      },
+      post: {
+        tags: ["Admin"],
+        summary: "Add a skill category",
+        security: [{ adminCookie: [] }],
+        responses: { "201": { description: "Created" }, "400": { description: "Validation failed" } },
+      },
+    },
+    "/api/admin/skills/{skillId}": {
+      patch: {
+        tags: ["Admin"],
+        summary: "Rename a skill category or turn it on or off",
+        security: [{ adminCookie: [] }],
+        parameters: [{ name: "skillId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: { "200": { description: "Updated" }, "404": { description: "Not found" } },
+      },
+    },
+    "/api/admin/password": {
+      post: {
+        tags: ["Admin"],
+        summary: "Change the signed-in admin's password",
+        security: [{ adminCookie: [] }],
+        responses: { "200": { description: "Changed" }, "400": { description: "Validation failed" } },
+      },
+    },
     "/api/admin/notices": {
       get: {
         tags: ["Admin"],
@@ -354,6 +413,13 @@ export const openApiDocument = {
         security: [{ adminCookie: [] }],
         parameters: [{ name: "noticeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
         responses: { "200": { description: "Updated notice" }, "401": { description: "Authentication required" } },
+      },
+      delete: {
+        tags: ["Admin"],
+        summary: "Delete a notice and its contact message",
+        security: [{ adminCookie: [] }],
+        parameters: [{ name: "noticeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: { "204": { description: "Deleted" }, "404": { description: "Not found" } },
       },
     },
     "/api/admin/posts": {

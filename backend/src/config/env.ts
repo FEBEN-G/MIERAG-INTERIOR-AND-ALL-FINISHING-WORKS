@@ -22,6 +22,7 @@ const envSchema = z.object({
   SMTP_PASS: z.preprocess(emptyToUndefined, z.string().optional()),
   SMTP_FROM: z.preprocess(emptyToUndefined, z.string().optional()),
   TRUST_PROXY: z.preprocess(emptyToUndefined, z.string().optional()),
+  UPLOAD_DIR: z.preprocess(emptyToUndefined, z.string().default(path.resolve(process.cwd(), "uploads"))),
 });
 
 const parsed = envSchema.safeParse(process.env);

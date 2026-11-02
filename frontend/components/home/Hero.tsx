@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { SiteImage } from "@/components/ui/SiteImage";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { images } from "@/lib/assets";
 import { ButtonLink } from "@/components/ui/ButtonLink";
@@ -63,8 +63,8 @@ export function Hero({ ready }: { ready: boolean }) {
   return (
     <section ref={rootRef} className="relative h-[100svh] min-h-[560px] overflow-hidden bg-night">
       <div className="hero-mask absolute inset-0 overflow-hidden">
-        <Image
-          src={images.hero.src}
+        <SiteImage
+          slot="hero"
           alt={images.hero.alt}
           fill
           priority

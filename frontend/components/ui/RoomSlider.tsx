@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import type { GalleryItem } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, isUploadedImage } from "@/lib/utils";
 
 type Props = {
   items: GalleryItem[];
@@ -33,6 +33,7 @@ export function RoomSlider({ items, previousLabel, nextLabel, caption }: Props) 
           <Image
             key={current.id}
             src={current.image.src}
+            unoptimized={isUploadedImage(current.image.src)}
             alt={text.title}
             fill
             sizes="(max-width: 1024px) 100vw, 1100px"
@@ -83,7 +84,7 @@ export function RoomSlider({ items, previousLabel, nextLabel, caption }: Props) 
                 active ? "border-brand" : "border-transparent opacity-80",
               )}
             >
-              <Image src={item.image.src} alt="" fill sizes="112px" className="object-cover" />
+              <Image src={item.image.src} unoptimized={isUploadedImage(item.image.src)} alt="" fill sizes="112px" className="object-cover" />
             </button>
           );
         })}

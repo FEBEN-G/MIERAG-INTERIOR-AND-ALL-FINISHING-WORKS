@@ -3,35 +3,46 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Briefcase, ExternalLink, FolderKanban, Images, LayoutDashboard, LogOut } from "lucide-react";
+import { Bell, Briefcase, ExternalLink, FolderKanban, Image as ImageIcon, Images, LayoutDashboard, LogOut, Phone, ShieldCheck, Wrench } from "lucide-react";
 import {
   adminLogout,
+  deleteApplication,
   getAdminApplications,
   getAdminMe,
   updateApplicationStatus,
   type AdminApplication,
 } from "@/lib/api/applications";
+import { errorMessage } from "@/lib/api/client";
 import {
+  deleteNotice,
   deletePost,
   deleteSite,
   getAdminPosts,
+  getAdminSkills,
   getNotices,
+  getSiteSettings,
   markNotice,
   POST_CATEGORIES,
   savePost,
   saveSite,
   type AdminNotice,
+  type AdminSkill,
   type PostCategory,
   type PostInput,
   type SiteInput,
+  type SiteSettings,
   type WorkPost,
 } from "@/lib/api/content";
-import { getAllSites, getSkills } from "@/lib/api/sites";
-import { APPLICATION_STATUSES, SITE_STATUSES, type ApplicationStatus, type Site, type SiteStatus, type SkillCategory } from "@/types";
+import { getAllSites } from "@/lib/api/sites";
+import { APPLICATION_STATUSES, SITE_STATUSES, type ApplicationStatus, type Site, type SiteStatus } from "@/types";
 import { BRAND } from "@/lib/brand";
+import { applySiteSettings } from "@/lib/site-settings";
 import { cn, formatDate } from "@/lib/utils";
+import { Empty, Field } from "./Field";
+import { ImagePicker, Thumbnail } from "./ImagePicker";
+import { AccountPanel, SiteDetailsPanel, SiteImagesPanel, SkillsPanel } from "./StudioPanels";
 
-type Tab = "home" | "notices" | "posts" | "projects" | "applications";
+type Tab = "home" | "notices" | "posts" | "images" | "projects" | "skills" | "applications" | "details" | "account";
 
 const SITE_LABEL: Record<SiteStatus, string> = {
   STRUCTURAL_WORK: "Structural work",
@@ -64,7 +75,7 @@ const emptyPost: PostInput = {
   title: "",
   description: "",
   category: "living",
-  imageUrl: "/assets/preview/living.jpg",
+  imageUrl: "",
   published: true,
 };
 
@@ -74,13 +85,17 @@ const emptySite = (): SiteInput => ({
   status: "FINAL_FINISHING",
   address: "",
   estimatedDuration: "",
-  coverImageUrl: "/assets/preview/hero.jpg",
+  coverImageUrl: "",
   compensationMin: null,
   compensationMax: null,
   compensationNote: "",
   currentWorkerCount: 0,
   isPreview: true,
-  skillCategoryIds: [],
+  latitude: null,
+  longitude: null,
+  startDate: null,
+  expectedCompletionDate: null,
+  requiredSkills: [],
 });
 
 type StudioSnapshot = {
@@ -89,8 +104,9 @@ type StudioSnapshot = {
   unread: number;
   posts: WorkPost[];
   sites: Site[];
-  skills: SkillCategory[];
+  skills: AdminSkill[];
   applications: AdminApplication[];
+  settings: SiteSettings;
 };
 
 let studioRequest: Promise<StudioSnapshot> | null = null;
@@ -102,8 +118,9 @@ function loadStudio(): Promise<StudioSnapshot> {
     const notices = await getNotices();
     const posts = await getAdminPosts();
     const siteResult = await getAllSites();
-    const skills = await getSkills();
+    const skills = await getAdminSkills();
     const applications = await getAdminApplications();
+    const settings = await getSiteSettings();
     return {
       email: me.data.email,
       notices: notices.data,
@@ -112,6 +129,7 @@ function loadStudio(): Promise<StudioSnapshot> {
       sites: siteResult.data,
       skills,
       applications,
+      settings,
     };
   })();
   studioRequest = request;
@@ -132,8 +150,9 @@ export function AdminConsole() {
   const [unread, setUnread] = useState(0);
   const [posts, setPosts] = useState<WorkPost[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
-  const [skills, setSkills] = useState<SkillCategory[]>([]);
+  const [skills, setSkills] = useState<AdminSkill[]>([]);
   const [applications, setApplications] = useState<AdminApplication[]>([]);
+  const [settings, setSettings] = useState<SiteSettings>({ contact: { phone: "", email: "", address: "" }, images: {} });
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -155,6 +174,7 @@ export function AdminConsole() {
         setSites(studio.sites);
         setSkills(studio.skills);
         setApplications(studio.applications);
+        setSettings(studio.settings);
         setReady(true);
       })
       .catch(() => {
@@ -176,6 +196,11 @@ export function AdminConsole() {
   function note(message: string) {
     setError(null);
     setFlash(message);
+  }
+
+  function changeSettings(next: SiteSettings) {
+    setSettings(next);
+    applySiteSettings(next);
   }
 
   async function signOut() {
@@ -208,13 +233,29 @@ export function AdminConsole() {
       title: "Work photos",
       lead: "These photos appear in the portfolio slider. The first living-room photo is shown first.",
     },
+    images: {
+      title: "Site images",
+      lead: "The logo and the fixed photos around the site. Replace any of them, or go back to the default.",
+    },
     projects: {
       title: "Projects",
       lead: "Job sites people can browse and apply to.",
     },
+    skills: {
+      title: "Skills",
+      lead: "The trades workers choose from. Turn a skill off to hide it without affecting past applications.",
+    },
     applications: {
       title: "Applications",
       lead: "People who asked to work on a project. Change the status as you review them.",
+    },
+    details: {
+      title: "Contact details",
+      lead: "The phone, email, and address shown on the public site.",
+    },
+    account: {
+      title: "Account",
+      lead: "Your studio sign-in.",
     },
   };
 
@@ -229,8 +270,12 @@ export function AdminConsole() {
           <NavButton current={tab} id="home" icon={<LayoutDashboard size={16} />} label="Overview" onSelect={setTab} />
           <NavButton current={tab} id="notices" icon={<Bell size={16} />} label="Messages" count={unread} onSelect={setTab} />
           <NavButton current={tab} id="posts" icon={<Images size={16} />} label="Work photos" count={posts.length} onSelect={setTab} />
+          <NavButton current={tab} id="images" icon={<ImageIcon size={16} />} label="Site images" onSelect={setTab} />
           <NavButton current={tab} id="projects" icon={<FolderKanban size={16} />} label="Projects" count={sites.length} onSelect={setTab} />
+          <NavButton current={tab} id="skills" icon={<Wrench size={16} />} label="Skills" onSelect={setTab} />
           <NavButton current={tab} id="applications" icon={<Briefcase size={16} />} label="Applications" count={waiting} onSelect={setTab} />
+          <NavButton current={tab} id="details" icon={<Phone size={16} />} label="Contact details" onSelect={setTab} />
+          <NavButton current={tab} id="account" icon={<ShieldCheck size={16} />} label="Account" onSelect={setTab} />
         </nav>
         <div className="mt-auto hidden space-y-3 px-4 py-5 lg:block">
           <Link href="/" className="inline-flex items-center gap-2 text-sm text-ink/75 hover:text-ink">
@@ -280,6 +325,11 @@ export function AdminConsole() {
                 await loadNotices();
                 note(notice.read ? "Marked as new." : "Marked as read.");
               }}
+              onDelete={async (notice) => {
+                await deleteNotice(notice.id);
+                await loadNotices();
+                note("Message deleted.");
+              }}
             />
           ) : null}
           {tab === "posts" ? (
@@ -289,6 +339,9 @@ export function AdminConsole() {
               onSaved={(message) => note(message)}
               onChange={async () => setPosts(await getAdminPosts())}
             />
+          ) : null}
+          {tab === "images" ? (
+            <SiteImagesPanel settings={settings} onChange={changeSettings} onError={setError} onSaved={note} />
           ) : null}
           {tab === "projects" ? (
             <ProjectEditor
@@ -302,14 +355,26 @@ export function AdminConsole() {
               }}
             />
           ) : null}
+          {tab === "skills" ? (
+            <SkillsPanel
+              skills={skills}
+              onError={setError}
+              onSaved={note}
+              onChange={async () => setSkills(await getAdminSkills())}
+            />
+          ) : null}
           {tab === "applications" ? (
             <ApplicationTable
               rows={applications}
               onError={setError}
               onChange={setApplications}
-              onSaved={() => note("Application status updated.")}
+              onSaved={note}
             />
           ) : null}
+          {tab === "details" ? (
+            <SiteDetailsPanel settings={settings} onChange={changeSettings} onError={setError} onSaved={note} />
+          ) : null}
+          {tab === "account" ? <AccountPanel onError={setError} onSaved={note} /> : null}
         </div>
       </div>
       {confirmSignOut ? (
@@ -475,10 +540,12 @@ function Stat({ label, value, hint, onClick }: { label: string; value: number; h
 function NoticeList({
   notices,
   onRead,
+  onDelete,
   onError,
 }: {
   notices: AdminNotice[];
   onRead: (notice: AdminNotice) => Promise<void>;
+  onDelete: (notice: AdminNotice) => Promise<void>;
   onError: (message: string) => void;
 }) {
   if (notices.length === 0) {
@@ -504,15 +571,27 @@ function NoticeList({
               ) : null}
               <p className="mt-2 text-xs text-ink/55">{formatDate(notice.createdAt)}</p>
             </div>
-            <button
-              type="button"
-              className="shrink-0 rounded-md border border-line px-3 py-2 text-sm hover:border-ink"
-              onClick={() => {
-                onRead(notice).catch((err: unknown) => onError(err instanceof Error ? err.message : "Could not update the message."));
-              }}
-            >
-              {notice.read ? "Mark as new" : "Mark as read"}
-            </button>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                className="rounded-md border border-line px-3 py-2 text-sm hover:border-ink"
+                onClick={() => {
+                  onRead(notice).catch((err: unknown) => onError(errorMessage(err, "Could not update the message.")));
+                }}
+              >
+                {notice.read ? "Mark as new" : "Mark as read"}
+              </button>
+              <button
+                type="button"
+                className="rounded-md border border-line px-3 py-2 text-sm text-error"
+                onClick={() => {
+                  if (!window.confirm("Delete this message? This cannot be undone.")) return;
+                  onDelete(notice).catch((err: unknown) => onError(errorMessage(err, "The message could not be deleted.")));
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </li>
       ))}
@@ -565,7 +644,7 @@ function PostEditor({
       await onChange();
       onSaved(editing ? "Photo updated." : "Photo added to the site.");
     } catch (err) {
-      onError(err instanceof Error ? err.message : "The photo could not be saved.");
+      onError(errorMessage(err, "The photo could not be saved."));
     } finally {
       setSaving(false);
     }
@@ -588,9 +667,12 @@ function PostEditor({
             ))}
           </select>
         </Field>
-        <Field label="Image address" hint="A file on this site, starting with /, or an Unsplash link.">
-          <input className="field" value={draft.imageUrl} onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value })} required />
-        </Field>
+        <ImagePicker
+          label="Photo"
+          value={draft.imageUrl}
+          onChange={(imageUrl) => setDraft((current) => ({ ...current, imageUrl }))}
+          onError={onError}
+        />
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={draft.published} onChange={(event) => setDraft({ ...draft, published: event.target.checked })} />
           Show this photo on the public site
@@ -612,12 +694,15 @@ function PostEditor({
           <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
             {visible.map((post) => (
               <li key={post.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{post.title}</p>
-                  <p className="text-sm text-ink/65">
-                    {CATEGORY_LABEL[post.category] ?? post.category}
-                    {post.published ? " · Visible" : " · Hidden"}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <Thumbnail src={post.imageUrl} className="h-14 w-20" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{post.title}</p>
+                    <p className="text-sm text-ink/65">
+                      {CATEGORY_LABEL[post.category] ?? post.category}
+                      {post.published ? " · Visible" : " · Hidden"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button type="button" className="rounded-md border border-line px-3 py-2 text-sm" onClick={() => edit(post)}>Edit</button>
@@ -631,7 +716,7 @@ function PostEditor({
                           await onChange();
                           onSaved("Photo removed.");
                         })
-                        .catch((err: unknown) => onError(err instanceof Error ? err.message : "The photo could not be removed."));
+                        .catch((err: unknown) => onError(errorMessage(err, "The photo could not be removed.")));
                     }}
                   >
                     Remove
@@ -654,7 +739,7 @@ function ProjectEditor({
   onSaved,
 }: {
   sites: Site[];
-  skills: SkillCategory[];
+  skills: AdminSkill[];
   onChange: () => Promise<void>;
   onError: (message: string) => void;
   onSaved: (message: string) => void;
@@ -684,17 +769,35 @@ function ProjectEditor({
       compensationNote: site.compensationNote ?? "",
       currentWorkerCount: site.currentWorkerCount,
       isPreview: site.isPreview,
-      skillCategoryIds: site.requiredSkills.map((skill) => skill.id),
+      latitude: site.latitude ?? null,
+      longitude: site.longitude ?? null,
+      startDate: site.startDate?.slice(0, 10) ?? null,
+      expectedCompletionDate: site.expectedCompletionDate?.slice(0, 10) ?? null,
+      requiredSkills: site.requiredSkills.map((skill) => ({
+        skillCategoryId: skill.id,
+        workersNeeded: skill.workersNeeded ?? null,
+      })),
     });
     document.getElementById("project-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  const chosen = (id: string) => draft.requiredSkills.some((item) => item.skillCategoryId === id);
+
   function toggleSkill(id: string) {
     setDraft((current) => ({
       ...current,
-      skillCategoryIds: current.skillCategoryIds.includes(id)
-        ? current.skillCategoryIds.filter((item) => item !== id)
-        : [...current.skillCategoryIds, id],
+      requiredSkills: current.requiredSkills.some((item) => item.skillCategoryId === id)
+        ? current.requiredSkills.filter((item) => item.skillCategoryId !== id)
+        : [...current.requiredSkills, { skillCategoryId: id, workersNeeded: null }],
+    }));
+  }
+
+  function setWorkersNeeded(id: string, workersNeeded: number | null) {
+    setDraft((current) => ({
+      ...current,
+      requiredSkills: current.requiredSkills.map((item) =>
+        item.skillCategoryId === id ? { ...item, workersNeeded } : item,
+      ),
     }));
   }
 
@@ -718,7 +821,7 @@ function ProjectEditor({
       await onChange();
       onSaved(wasEdit ? "Project updated." : "Project added.");
     } catch (err) {
-      onError(err instanceof Error ? err.message : "The project could not be saved.");
+      onError(errorMessage(err, "The project could not be saved."));
     } finally {
       setSaving(false);
     }
@@ -747,9 +850,26 @@ function ProjectEditor({
             ))}
           </select>
         </Field>
-        <Field label="Cover image address" hint="A file on this site, starting with /, or an Unsplash link.">
-          <input className="field" value={draft.coverImageUrl} onChange={(event) => setDraft({ ...draft, coverImageUrl: event.target.value })} required />
-        </Field>
+        <ImagePicker
+          label="Cover photo"
+          value={draft.coverImageUrl}
+          onChange={(coverImageUrl) => setDraft((current) => ({ ...current, coverImageUrl }))}
+          onError={onError}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Start date">
+            <input className="field" type="date" value={draft.startDate ?? ""} onChange={(event) => setDraft({ ...draft, startDate: event.target.value || null })} />
+          </Field>
+          <Field label="Expected end date">
+            <input className="field" type="date" value={draft.expectedCompletionDate ?? ""} onChange={(event) => setDraft({ ...draft, expectedCompletionDate: event.target.value || null })} />
+          </Field>
+          <Field label="Map latitude" hint="Optional.">
+            <input className="field" type="number" step="any" min={-90} max={90} value={draft.latitude ?? ""} onChange={(event) => setDraft({ ...draft, latitude: event.target.value === "" ? null : Number(event.target.value) })} />
+          </Field>
+          <Field label="Map longitude" hint="Optional.">
+            <input className="field" type="number" step="any" min={-180} max={180} value={draft.longitude ?? ""} onChange={(event) => setDraft({ ...draft, longitude: event.target.value === "" ? null : Number(event.target.value) })} />
+          </Field>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Lowest daily pay (ETB)">
             <input className="field" type="number" min={0} value={draft.compensationMin ?? ""} onChange={(event) => setDraft({ ...draft, compensationMin: event.target.value === "" ? null : Number(event.target.value) })} />
@@ -766,17 +886,30 @@ function ProjectEditor({
         </Field>
         <fieldset>
           <legend className="text-sm font-medium">Skills this site needs</legend>
-          <p className="mt-1 text-xs text-ink/60">Select every trade that can apply.</p>
+          <p className="mt-1 text-xs text-ink/60">Select every trade that can apply, then enter how many workers are needed.</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {skills.map((skill) => {
-              const on = draft.skillCategoryIds.includes(skill.id);
-              return (
-                <button key={skill.id} type="button" onClick={() => toggleSkill(skill.id)} className={cn("min-h-10 rounded-md px-3 text-sm", on ? "bg-ink text-ivory" : "border border-line")}>
-                  {skill.name}
-                </button>
-              );
-            })}
+            {skills.filter((skill) => skill.isActive || chosen(skill.id)).map((skill) => (
+              <button key={skill.id} type="button" onClick={() => toggleSkill(skill.id)} className={cn("min-h-10 rounded-md px-3 text-sm", chosen(skill.id) ? "bg-ink text-ivory" : "border border-line")}>
+                {skill.name}
+              </button>
+            ))}
           </div>
+          {draft.requiredSkills.length > 0 ? (
+            <div className="mt-3 space-y-2">
+              {draft.requiredSkills.map((item) => (
+                <label key={item.skillCategoryId} className="flex items-center justify-between gap-3 text-sm">
+                  <span>{skills.find((skill) => skill.id === item.skillCategoryId)?.name}: workers needed</span>
+                  <input
+                    className="field max-w-24"
+                    type="number"
+                    min={1}
+                    value={item.workersNeeded ?? ""}
+                    onChange={(event) => setWorkersNeeded(item.skillCategoryId, event.target.value === "" ? null : Number(event.target.value))}
+                  />
+                </label>
+              ))}
+            </div>
+          ) : null}
         </fieldset>
         <label className="flex items-start gap-2 text-sm">
           <input className="mt-1" type="checkbox" checked={draft.isPreview} onChange={(event) => setDraft({ ...draft, isPreview: event.target.checked })} />
@@ -799,12 +932,15 @@ function ProjectEditor({
           <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
             {visible.map((site) => (
               <li key={site.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{site.name}</p>
-                  <p className="text-sm text-ink/65">
-                    {SITE_LABEL[site.status]} · {site.address}
-                    {site.isRecruiting ? " · Hiring" : " · Closed"}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <Thumbnail src={site.coverImageUrl} className="h-14 w-20" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{site.name}</p>
+                    <p className="text-sm text-ink/65">
+                      {SITE_LABEL[site.status]} · {site.address}
+                      {site.isRecruiting ? " · Hiring" : " · Closed"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button type="button" className="rounded-md border border-line px-3 py-2 text-sm" onClick={() => edit(site)}>Edit</button>
@@ -818,7 +954,7 @@ function ProjectEditor({
                           await onChange();
                           onSaved("Project removed.");
                         })
-                        .catch((err: unknown) => onError(err instanceof Error ? err.message : "The project could not be removed."));
+                        .catch((err: unknown) => onError(errorMessage(err, "The project could not be removed.")));
                     }}
                   >
                     Remove
@@ -842,7 +978,7 @@ function ApplicationTable({
   rows: AdminApplication[];
   onChange: (rows: AdminApplication[]) => void;
   onError: (message: string) => void;
-  onSaved: () => void;
+  onSaved: (message: string) => void;
 }) {
   const [status, setStatus] = useState<"" | ApplicationStatus>("");
   const [query, setQuery] = useState("");
@@ -874,6 +1010,7 @@ function ApplicationTable({
                 <th className="px-4 py-3 font-medium">Skill</th>
                 <th className="px-4 py-3 font-medium">Daily pay</th>
                 <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
@@ -898,9 +1035,9 @@ function ApplicationTable({
                         try {
                           await updateApplicationStatus(row.id, next);
                           onChange(rows.map((item) => (item.id === row.id ? { ...item, status: next } : item)));
-                          onSaved();
+                          onSaved("Application status updated.");
                         } catch (err) {
-                          onError(err instanceof Error ? err.message : "Status could not be updated.");
+                          onError(errorMessage(err, "Status could not be updated."));
                         }
                       }}
                     >
@@ -908,6 +1045,23 @@ function ApplicationTable({
                         <option key={item} value={item}>{APPLICATION_LABEL[item]}</option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-4 py-4">
+                    <button
+                      type="button"
+                      className="rounded-md border border-line px-3 py-2 text-sm text-error"
+                      onClick={() => {
+                        if (!window.confirm(`Delete the application from ${row.fullName}? This cannot be undone.`)) return;
+                        deleteApplication(row.id)
+                          .then(() => {
+                            onChange(rows.filter((item) => item.id !== row.id));
+                            onSaved("Application deleted.");
+                          })
+                          .catch((err: unknown) => onError(errorMessage(err, "The application could not be deleted.")));
+                      }}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -917,18 +1071,4 @@ function ApplicationTable({
       )}
     </div>
   );
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium">{label}</span>
-      {hint ? <span className="mt-0.5 block text-xs text-ink/60">{hint}</span> : null}
-      <div className="mt-1.5">{children}</div>
-    </label>
-  );
-}
-
-function Empty({ children }: { children: ReactNode }) {
-  return <p className="rounded-lg border border-dashed border-line px-4 py-8 text-sm text-ink/70">{children}</p>;
 }
