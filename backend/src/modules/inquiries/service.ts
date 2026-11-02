@@ -18,22 +18,26 @@ export async function createInquiry(body: unknown) {
   }
 
   const phone = parsed.data.phone?.trim() || null;
-  const inquiry = await prisma.inquiry.create({
-    data: {
-      name: parsed.data.name,
-      email: parsed.data.email.toLowerCase(),
-      phone,
-      message: parsed.data.message,
-    },
-  });
+  const inquiry = await prisma.$transaction(async (tx) => {
+    const created = await tx.inquiry.create({
+      data: {
+        name: parsed.data.name,
+        email: parsed.data.email.toLowerCase(),
+        phone,
+        message: parsed.data.message,
+      },
+    });
 
-  await prisma.adminNotice.create({
-    data: {
-      kind: "INQUIRY",
-      title: "New message",
-      body: `${inquiry.name} (${inquiry.email}) sent a message.`,
-      inquiryId: inquiry.id,
-    },
+    await tx.adminNotice.create({
+      data: {
+        kind: "INQUIRY",
+        title: "New message",
+        body: `${created.name} (${created.email}) sent a message.`,
+        inquiryId: created.id,
+      },
+    });
+
+    return created;
   });
 
   await notifyAdminOfInquiry({

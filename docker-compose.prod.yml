@@ -2,9 +2,18 @@
 # Usage: cp .env.production.example .env  →  fill it in  →  docker compose -f docker-compose.prod.yml up -d --build
 name: mierag
 
+# Keep logs from filling the server's disk.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   postgres:
+    logging: *logging
     image: postgres:16
+    stop_grace_period: 60s
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-mierag}
@@ -20,6 +29,7 @@ services:
     # No published port: only the API can reach the database.
 
   backend:
+    logging: *logging
     build: ./backend
     restart: unless-stopped
     depends_on:
@@ -46,6 +56,7 @@ services:
       - uploads:/app/uploads
 
   frontend:
+    logging: *logging
     build:
       context: ./frontend
       args:
@@ -56,6 +67,7 @@ services:
       - backend
 
   caddy:
+    logging: *logging
     image: caddy:2
     restart: unless-stopped
     depends_on:

@@ -85,7 +85,7 @@ export async function login(body: unknown) {
   return {
     email: admin.email,
     role: admin.role,
-    token: signAdminToken({ id: admin.id, email: admin.email, role: admin.role }),
+    token: signAdminToken(admin),
   };
 }
 
@@ -190,8 +190,12 @@ export async function changePassword(adminId: string, body: unknown) {
   if (!matches) {
     throw new AppError(400, "Validation failed", { currentPassword: "That is not your current password." });
   }
-  await prisma.admin.update({
+  const updated = await prisma.admin.update({
     where: { id: adminId },
-    data: { passwordHash: await bcrypt.hash(parsed.data.newPassword, 12) },
+    data: {
+      passwordHash: await bcrypt.hash(parsed.data.newPassword, 12),
+      tokenVersion: { increment: 1 },
+    },
   });
+  return signAdminToken(updated);
 }

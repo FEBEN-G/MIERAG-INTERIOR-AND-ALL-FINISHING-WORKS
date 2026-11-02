@@ -42,45 +42,54 @@ export async function createApplication(body: unknown) {
     });
   }
 
-  const duplicate = await prisma.application.findFirst({
-    where: {
-      siteId: input.siteId,
-      phoneNumber: input.phoneNumber,
-      createdAt: { gte: new Date(Date.now() - DUPLICATE_WINDOW_MS) },
-    },
-    select: { id: true },
-  });
+  // The lock makes the duplicate check and the insert one step, so two identical
+  // submissions at the same moment cannot both pass. The notice is saved with the application.
+  const application = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`application:${input.siteId}:${input.phoneNumber}`}))`;
 
-  if (duplicate) {
-    throw new AppError(
-      409,
-      "An application with this phone number was already submitted for this project in the last 24 hours.",
-    );
-  }
+    const duplicate = await tx.application.findFirst({
+      where: {
+        siteId: input.siteId,
+        phoneNumber: input.phoneNumber,
+        createdAt: { gte: new Date(Date.now() - DUPLICATE_WINDOW_MS) },
+      },
+      select: { id: true },
+    });
 
-  const application = await prisma.application.create({
-    data: {
-      siteId: input.siteId,
-      fullName: input.fullName,
-      phoneNumber: input.phoneNumber,
-      skillCategoryId: input.skillCategoryId,
-      expectedRate: input.expectedRate,
-      experienceYears: input.experienceYears,
-      experienceDetails: input.experienceDetails,
-    },
-    select: {
-      id: true,
-      status: true,
-      createdAt: true,
-    },
-  });
+    if (duplicate) {
+      throw new AppError(
+        409,
+        "An application with this phone number was already submitted for this project in the last 24 hours.",
+      );
+    }
 
-  await prisma.adminNotice.create({
-    data: {
-      kind: "APPLICATION",
-      title: "New application",
-      body: `${input.fullName} (${input.phoneNumber}) applied for ${site.name}.`,
-    },
+    const created = await tx.application.create({
+      data: {
+        siteId: input.siteId,
+        fullName: input.fullName,
+        phoneNumber: input.phoneNumber,
+        skillCategoryId: input.skillCategoryId,
+        expectedRate: input.expectedRate,
+        experienceYears: input.experienceYears,
+        experienceDetails: input.experienceDetails,
+      },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    await tx.adminNotice.create({
+      data: {
+        kind: "APPLICATION",
+        title: "New application",
+        body: `${input.fullName} (${input.phoneNumber}) applied for ${site.name}.`,
+        applicationId: created.id,
+      },
+    });
+
+    return created;
   });
 
   try {

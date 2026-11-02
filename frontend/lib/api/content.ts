@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { ImageSlot } from "@/lib/site-images";
+import type { ImageSlot, SectionId } from "@/lib/site-images";
 import type { ApplicationStatus, GalleryItem, Site, SiteStatus, SkillCategory } from "@/types";
 
 export const POST_CATEGORIES = [
@@ -57,14 +57,30 @@ export type SiteInput = {
 
 export type AdminSkill = SkillCategory & { isActive: boolean };
 
+export type ServiceInput = {
+  titleAm: string;
+  titleEn: string;
+  descriptionAm: string;
+  descriptionEn: string;
+  imageUrl: string;
+  published: boolean;
+};
+
+export type AdminService = ServiceInput & { id: string; slug: string };
+
 export type SiteSettings = {
-  contact: { phone: string; email: string; address: string };
+  contact: { phone: string; email: string; address: string; companyName: string };
   images: Partial<Record<ImageSlot, string>>;
+  text: { am: Record<string, string>; en: Record<string, string> };
+  hiddenSections: SectionId[];
+  services: AdminService[] | null;
 };
 
 export type SiteSettingsPatch = {
   contact?: SiteSettings["contact"];
   images?: Partial<Record<ImageSlot, string | null>>;
+  text?: { am?: Record<string, string | null>; en?: Record<string, string | null> };
+  hiddenSections?: SectionId[];
 };
 
 export type InquiryInput = {
@@ -120,6 +136,39 @@ export async function savePost(input: PostInput, id?: string) {
   const result = await apiFetch<{ data: WorkPost }>(id ? `/api/admin/posts/${id}` : "/api/admin/posts", {
     method: id ? "PATCH" : "POST",
     body: JSON.stringify(input),
+  });
+  return result.data;
+}
+
+export async function reorderPosts(ids: string[]) {
+  const result = await apiFetch<{ data: WorkPost[] }>("/api/admin/posts/order", {
+    method: "PUT",
+    body: JSON.stringify({ ids }),
+  });
+  return result.data;
+}
+
+export async function getAdminServices() {
+  const result = await apiFetch<{ data: AdminService[] }>("/api/admin/services");
+  return result.data;
+}
+
+export async function saveService(input: ServiceInput, id?: string) {
+  const result = await apiFetch<{ data: AdminService }>(id ? `/api/admin/services/${id}` : "/api/admin/services", {
+    method: id ? "PATCH" : "POST",
+    body: JSON.stringify(input),
+  });
+  return result.data;
+}
+
+export async function deleteService(id: string) {
+  await apiFetch<void>(`/api/admin/services/${id}`, { method: "DELETE" });
+}
+
+export async function reorderServices(ids: string[]) {
+  const result = await apiFetch<{ data: AdminService[] }>("/api/admin/services/order", {
+    method: "PUT",
+    body: JSON.stringify({ ids }),
   });
   return result.data;
 }

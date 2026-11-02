@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { CinematicIntro } from "@/components/layout/CinematicIntro";
+import { useSiteSettings } from "@/lib/site-settings";
 import { About } from "./About";
 import { ContactCinematic } from "./ContactCinematic";
 import { Hero } from "./Hero";
@@ -27,17 +28,18 @@ export function HomeExperience() {
   const skipIntro = useSyncExternalStore(noop, shouldSkipIntro, () => false);
   const [introDone, setIntroDone] = useState(false);
   const ready = skipIntro || introDone;
+  const { hiddenSections } = useSiteSettings().settings;
 
   return (
     <>
       {ready ? null : <CinematicIntro onComplete={() => setIntroDone(true)} />}
       <Hero ready={ready} />
-      <Services />
-      <About />
-      <Portfolio />
-      <Transformation />
-      <ProjectsSection />
-      <ContactCinematic />
+      {hiddenSections.includes("services") ? null : <Services />}
+      {hiddenSections.includes("about") ? null : <About />}
+      {hiddenSections.includes("work") ? null : <Portfolio />}
+      {hiddenSections.includes("transformation") ? null : <Transformation />}
+      {hiddenSections.includes("projects") ? null : <ProjectsSection />}
+      {hiddenSections.includes("contact") ? null : <ContactCinematic />}
     </>
   );
 }

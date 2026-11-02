@@ -36,6 +36,15 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 
+if (env.NODE_ENV === "production") {
+  if (env.JWT_SECRET.length < 32 || env.JWT_SECRET.includes("change-this")) {
+    throw new Error("Invalid environment configuration: use a random JWT_SECRET of at least 32 characters in production");
+  }
+  if (env.ADMIN_PASSWORD === "change-me") {
+    throw new Error("Invalid environment configuration: change ADMIN_PASSWORD before running in production");
+  }
+}
+
 export const isSmtpConfigured = Boolean(env.SMTP_HOST && env.SMTP_FROM);
 
 /**

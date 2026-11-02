@@ -53,6 +53,8 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   if (!req.admin) {
     throw new AppError(401, "Authentication required");
   }
-  await adminService.changePassword(req.admin.id, req.body);
+  // Other sessions end; this one continues with a fresh token.
+  const token = await adminService.changePassword(req.admin.id, req.body);
+  res.cookie(ADMIN_COOKIE_NAME, token, adminCookieOptions());
   res.json({ data: { ok: true } });
 });

@@ -5,13 +5,16 @@ import { SiteImage } from "@/components/ui/SiteImage";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mail, Moon, Phone, Sun } from "lucide-react";
-import { BRAND, NAV_ITEMS } from "@/lib/brand";
+import { BRAND } from "@/lib/brand";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { useActiveSection } from "@/hooks/useActiveSection";
+import { useNavItems } from "@/hooks/useNavItems";
 import { useSiteSettings } from "@/lib/site-settings";
 import { cn, telHref } from "@/lib/utils";
 import { NavOverlay } from "./NavOverlay";
+
+const HEADER_LINKS: string[] = ["services", "work", "projects"];
 
 type Props = {
   tone?: "light" | "auto";
@@ -30,7 +33,7 @@ export function Header({ tone = "auto", visible = true }: Props) {
   const { theme, toggleTheme } = useTheme();
   const active = useActiveSection();
   const overDarkMedia = pathname === "/" || pathname === "/gallery";
-  const navKeys = ["services", "work", "projects"] as const;
+  const navItems = useNavItems().filter((item) => HEADER_LINKS.includes(item.key));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -109,12 +112,12 @@ export function Header({ tone = "auto", visible = true }: Props) {
                 inverted ? "text-paper" : "text-ink",
               )}
             >
-              {BRAND.name}
+              {settings.contact.companyName || BRAND.name}
             </span>
           </Link>
           <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
-            {NAV_ITEMS.slice(1, 4).map((item, index) => {
-              const key = navKeys[index];
+            {navItems.map((item) => {
+              const key = item.key;
               const current = active === key;
               return (
                 <Link

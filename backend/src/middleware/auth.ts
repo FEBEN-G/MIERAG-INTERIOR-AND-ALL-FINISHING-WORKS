@@ -13,6 +13,7 @@ type AdminTokenPayload = {
   sub: string;
   email: string;
   role: "ADMIN";
+  ver?: number;
 };
 
 export function adminCookieOptions(): CookieOptions {
@@ -30,9 +31,9 @@ export function clearAdminCookie(res: Response) {
   res.clearCookie(ADMIN_COOKIE_NAME, options);
 }
 
-export function signAdminToken(admin: { id: string; email: string; role: string }): string {
+export function signAdminToken(admin: { id: string; email: string; role: string; tokenVersion: number }): string {
   return jwt.sign(
-    { email: admin.email, role: "ADMIN" },
+    { email: admin.email, role: "ADMIN", ver: admin.tokenVersion },
     env.JWT_SECRET,
     {
       algorithm: "HS256",
@@ -85,11 +86,13 @@ async function resolveAdmin(req: Request): Promise<AdminRecord | null> {
 
   const admin = await prisma.admin.findUnique({
     where: { id: payload.sub },
-    select: { id: true, email: true, role: true },
+    select: { id: true, email: true, role: true, tokenVersion: true },
   });
 
   if (!admin || admin.role !== "ADMIN") return null;
-  return admin;
+  // Tokens issued before the last password change stop working.
+  if ((payload.ver ?? 0) !== admin.tokenVersion) return null;
+  return { id: admin.id, email: admin.email, role: admin.role };
 }
 
 export async function loadOptionalAdmin(req: Request, res: Response): Promise<AdminRecord | null> {

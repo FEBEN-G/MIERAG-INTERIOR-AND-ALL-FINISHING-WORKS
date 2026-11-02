@@ -18,6 +18,10 @@ export const updatePost = asyncHandler(async (req: Request, res: Response) => {
   res.json(await postsService.updatePost(req.params.postId as string, req.body));
 });
 
+export const reorderPosts = asyncHandler(async (req: Request, res: Response) => {
+  res.json(await postsService.reorderPosts(req.body));
+});
+
 export const deletePost = asyncHandler(async (req: Request, res: Response) => {
   await postsService.deletePost(req.params.postId as string);
   res.status(204).send();

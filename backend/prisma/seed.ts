@@ -261,7 +261,7 @@ const PREVIEW_POSTS = [
 ] as const;
 
 async function seedPosts() {
-  for (const post of PREVIEW_POSTS) {
+  for (const [index, post] of PREVIEW_POSTS.entries()) {
     const existing = await prisma.post.findUnique({ where: { slug: post.slug }, select: { customized: true } });
     if (existing?.customized) continue;
     await prisma.post.upsert({
@@ -272,14 +272,74 @@ async function seedPosts() {
         category: post.category,
         imageUrl: post.imageUrl,
       },
-      create: { ...post, published: true },
+      create: { ...post, published: true, sortOrder: index + 1 },
     });
   }
+}
+
+const DEFAULT_SERVICES = [
+  {
+    slug: "interior",
+    titleEn: "Interior Finishing",
+    titleAm: "የውስጥ ማጠናቀቂያ",
+    descriptionEn: "Complete interior sequences — walls, joinery interfaces, and the quiet alignment of rooms that must be lived in as well as seen.",
+    descriptionAm: "ግድግዳ፣ በርና መስኮት፣ እንዲሁም ክፍሎች አንድ ላይ እንዲነበቡ የሚያደርግ ሙሉ የውስጥ ስራ።",
+    imageUrl: "/assets/preview/living.jpg",
+  },
+  {
+    slug: "exterior",
+    titleEn: "Exterior Finishing",
+    titleAm: "የውጭ ማጠናቀቂያ",
+    descriptionEn: "Facade composure, weather-facing surfaces, and the last layer that gives a building its public presence.",
+    descriptionAm: "የፊት ገጽታ፣ ከዝናብና ከፀሐይ የሚከላከል ንብርብር፣ እና ሕንፃው ለሰው የሚታይበት የመጨረሻ ገጽ።",
+    imageUrl: "/assets/preview/exterior.jpg",
+  },
+  {
+    slug: "gypsum",
+    titleEn: "Gypsum and Ceiling Works",
+    titleAm: "ጂፕሰም እና የጣሪያ ስራ",
+    descriptionEn: "Ceiling planes, cornices, and gypsum volumes that hold light and proportion without drawing attention to themselves.",
+    descriptionAm: "ጣሪያ፣ ኮርኒስ እና የጂፕሰም ቅርጽ። ብርሃንንና ሚዛንን ይይዛሉ፣ ራሳቸውን ግን አያስቀድሙም።",
+    imageUrl: "/assets/preview/ceiling.jpg",
+  },
+  {
+    slug: "tile",
+    titleEn: "Tile and Flooring Installation",
+    titleAm: "ሰድር እና የወለል ስራ",
+    descriptionEn: "Floors and wet-area surfaces set with disciplined jointing, level, and material continuity from threshold to room.",
+    descriptionAm: "ወለልና እርጥብ ክፍል በቀጥተኛ መስመር፣ በእኩል ደረጃ እና ያልተቋረጠ ቁሳቁስ ይገጠማሉ።",
+    imageUrl: "/assets/preview/tile.jpg",
+  },
+  {
+    slug: "painting",
+    titleEn: "Painting and Decorative Finishing",
+    titleAm: "ቀለም እና የጌጣጌጥ ማጠናቀቂያ",
+    descriptionEn: "Color, sheen, and decorative layers applied as part of the architecture rather than as a final afterthought.",
+    descriptionAm: "ቀለምና አንጸባራቂ እንደ ሕንፃው አካል ይቀባሉ፤ በመጨረሻ ላይ የሚጨመር ጌጥ አይደሉም።",
+    imageUrl: "/assets/preview/painting.jpg",
+  },
+  {
+    slug: "renovation",
+    titleEn: "Renovation and Final Finishing",
+    titleAm: "እድሳት እና የመጨረሻ ማጠናቀቂያ",
+    descriptionEn: "The last sequence of a renovation — coordinating trades so the closing week of work is as precise as the first.",
+    descriptionAm: "የእድሳት መጨረሻ። የተለያዩ የእጅ ሙያዎች አንድ ላይ ሲጠናቀቁ፣ የመዝጊያ ሳምንቱ እንደ መጀመሪያው ቀን ትክክል ይሆናል።",
+    imageUrl: "/assets/preview/detail.jpg",
+  },
+];
+
+/** Runs only on an empty table, so services the admin removed or changed stay that way. */
+async function seedServices() {
+  if ((await prisma.service.count()) > 0) return;
+  await prisma.service.createMany({
+    data: DEFAULT_SERVICES.map((service, index) => ({ ...service, sortOrder: index + 1 })),
+  });
 }
 
 async function main() {
   const skillsBySlug = await seedSkillCategories();
   await seedAdmin();
+  await seedServices();
   // SEED_PREVIEW=false creates only the skills and the admin, for a live site with real content.
   if (process.env.SEED_PREVIEW === "false") return;
   await seedSites(skillsBySlug);

@@ -93,6 +93,9 @@ export function SiteDetailsPanel({
 
   return (
     <form className="max-w-lg space-y-4 rounded-lg border border-line bg-surface p-4" onSubmit={(event) => void onSubmit(event)}>
+      <Field label="Company name" hint="Leave empty to keep the standard name.">
+        <input className="field" value={draft.companyName} onChange={(event) => setDraft({ ...draft, companyName: event.target.value })} />
+      </Field>
       <Field label="Phone" hint="Shown at the top of every page, for example +251 91 123 4567.">
         <input className="field" value={draft.phone} onChange={(event) => setDraft({ ...draft, phone: event.target.value })} />
       </Field>

@@ -97,12 +97,19 @@ docker compose -f docker-compose.prod.yml logs -f --tail=100
 
 ## Updating
 
+Back up first: an update can change the database structure, and the API applies those changes automatically when it starts.
+
 ```bash
 cd /opt/mierag
+./deploy/backup.sh
 git pull
 docker compose -f docker-compose.prod.yml up -d --build
 docker image prune -f
 ```
+
+## Security checks at startup
+
+In production the API refuses to start with a `JWT_SECRET` shorter than 32 characters or still set to the example value, or with `ADMIN_PASSWORD` set to `change-me`. Generate the secrets as shown in step 4.
 
 ## Backups
 
@@ -112,7 +119,9 @@ docker image prune -f
 0 3 * * * cd /opt/mierag && ./deploy/backup.sh >> backups/backup.log 2>&1
 ```
 
-Copy the `backups/` folder off the server regularly (for example with `rsync` or your VPS provider's snapshots).
+Copy the `backups/` folder off the server regularly (for example with `rsync` or your VPS provider's snapshots). A backup that stays on the same server is lost with that server.
+
+Test a restore at least once before going live, so you know it works before you need it.
 
 Restore the database:
 

@@ -343,14 +343,14 @@ export const openApiDocument = {
     "/api/settings": {
       get: {
         tags: ["Settings"],
-        summary: "Public contact details and replaced site images",
+        summary: "Public site content: contact details, images, text changes, hidden sections, services",
         responses: { "200": { description: "Settings" } },
       },
     },
     "/api/admin/settings": {
       patch: {
         tags: ["Admin"],
-        summary: "Update contact details or site images (null restores the default image)",
+        summary: "Update contact details, images, website text, or hidden sections (null restores a default)",
         security: [{ adminCookie: [] }],
         responses: { "200": { description: "Updated settings" }, "400": { description: "Validation failed" } },
       },
@@ -365,6 +365,52 @@ export const openApiDocument = {
           "413": { description: "File too large" },
           "415": { description: "Not a supported image" },
         },
+      },
+    },
+    "/api/admin/services": {
+      get: {
+        tags: ["Admin"],
+        summary: "List all services, including hidden ones",
+        security: [{ adminCookie: [] }],
+        responses: { "200": { description: "Services" } },
+      },
+      post: {
+        tags: ["Admin"],
+        summary: "Add a service",
+        security: [{ adminCookie: [] }],
+        responses: { "201": { description: "Created" }, "400": { description: "Validation failed" } },
+      },
+    },
+    "/api/admin/services/order": {
+      put: {
+        tags: ["Admin"],
+        summary: "Set the display order of services",
+        security: [{ adminCookie: [] }],
+        responses: { "200": { description: "Services in the new order" } },
+      },
+    },
+    "/api/admin/services/{serviceId}": {
+      patch: {
+        tags: ["Admin"],
+        summary: "Update a service",
+        security: [{ adminCookie: [] }],
+        parameters: [{ name: "serviceId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: { "200": { description: "Updated" }, "404": { description: "Not found" } },
+      },
+      delete: {
+        tags: ["Admin"],
+        summary: "Delete a service",
+        security: [{ adminCookie: [] }],
+        parameters: [{ name: "serviceId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+        responses: { "204": { description: "Deleted" }, "404": { description: "Not found" } },
+      },
+    },
+    "/api/admin/posts/order": {
+      put: {
+        tags: ["Admin"],
+        summary: "Set the display order of work photos",
+        security: [{ adminCookie: [] }],
+        responses: { "200": { description: "Photos in the new order" } },
       },
     },
     "/api/admin/skills": {

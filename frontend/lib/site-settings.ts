@@ -6,11 +6,18 @@ import { isApiConfigured } from "@/lib/api/client";
 
 type SettingsState = { ready: boolean; settings: SiteSettings };
 
-const CACHE_KEY = "mierag-site-settings";
+const CACHE_KEY = "mierag-site-settings-v2";
 const LOAD_TIMEOUT_MS = 2500;
-const EMPTY: SiteSettings = { contact: { phone: "", email: "", address: "" }, images: {} };
+export const EMPTY_SETTINGS: SiteSettings = {
+  contact: { phone: "", email: "", address: "", companyName: "" },
+  images: {},
+  text: { am: {}, en: {} },
+  hiddenSections: [],
+  // Null means "use the built-in list"; an empty list means the admin removed every service.
+  services: null,
+};
 // Pages are prerendered, so the server renders defaults. Without an API there is nothing to wait for.
-const SERVER_STATE: SettingsState = { ready: !isApiConfigured(), settings: EMPTY };
+const SERVER_STATE: SettingsState = { ready: !isApiConfigured(), settings: EMPTY_SETTINGS };
 
 const listeners = new Set<() => void>();
 let state: SettingsState | null = null;

@@ -2,29 +2,30 @@
 
 import Link from "next/link";
 import { SiteImage } from "@/components/ui/SiteImage";
-import { BRAND, NAV_ITEMS } from "@/lib/brand";
+import { BRAND } from "@/lib/brand";
+import { useNavItems } from "@/hooks/useNavItems";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { useSiteSettings } from "@/lib/site-settings";
-
-const NAV_KEYS = ["home", "services", "work", "projects", "about", "contact"] as const;
 
 export function Footer() {
   const { t } = useI18n();
   const { ready, settings } = useSiteSettings();
-  const details = Object.values(settings.contact).filter(Boolean).join(" · ");
+  const navItems = useNavItems();
+  const { phone, email, address, companyName } = settings.contact;
+  const details = [phone, email, address].filter(Boolean).join(" · ");
 
   return (
     <footer className="border-t border-line bg-ivory px-4 py-14 sm:px-6 md:px-10">
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-[1.4fr_1fr]">
         <div>
           <SiteImage slot="logo" alt={BRAND.logoAlt} width={64} height={48} className="h-12 w-auto" style={{ width: "auto" }} />
-          <p className="mt-6 max-w-sm text-sm leading-7 text-ink">{BRAND.name}</p>
+          <p className="mt-6 max-w-sm text-sm leading-7 text-ink">{companyName || BRAND.name}</p>
           <p className="mt-3 max-w-full text-sm leading-relaxed text-gold-ink">{t.hero.lines.join(" ")}</p>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
-          {NAV_ITEMS.map((item, index) => (
+          {navItems.map((item) => (
             <Link key={item.href} href={item.href} className="min-w-0 text-sm leading-snug text-ink/85 hover:text-ink">
-              {t.nav[NAV_KEYS[index]]}
+              {t.nav[item.key]}
             </Link>
           ))}
         </div>

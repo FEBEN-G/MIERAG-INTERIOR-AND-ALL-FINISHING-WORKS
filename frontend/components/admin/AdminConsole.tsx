@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Briefcase, ExternalLink, FolderKanban, Image as ImageIcon, Images, LayoutDashboard, LogOut, Phone, ShieldCheck, Wrench } from "lucide-react";
+import { Bell, Briefcase, ExternalLink, FolderKanban, Hammer, Image as ImageIcon, Images, LayoutDashboard, LayoutList, LogOut, Phone, ShieldCheck, Type, Wrench } from "lucide-react";
 import {
   adminLogout,
   deleteApplication,
@@ -18,14 +18,17 @@ import {
   deletePost,
   deleteSite,
   getAdminPosts,
+  getAdminServices,
   getAdminSkills,
   getNotices,
   getSiteSettings,
   markNotice,
   POST_CATEGORIES,
+  reorderPosts,
   savePost,
   saveSite,
   type AdminNotice,
+  type AdminService,
   type AdminSkill,
   type PostCategory,
   type PostInput,
@@ -36,13 +39,14 @@ import {
 import { getAllSites } from "@/lib/api/sites";
 import { APPLICATION_STATUSES, SITE_STATUSES, type ApplicationStatus, type Site, type SiteStatus } from "@/types";
 import { BRAND } from "@/lib/brand";
-import { applySiteSettings } from "@/lib/site-settings";
+import { applySiteSettings, EMPTY_SETTINGS } from "@/lib/site-settings";
 import { cn, formatDate } from "@/lib/utils";
+import { moved, MoveButtons, SectionsPanel, ServicesPanel, WebsiteTextPanel } from "./ContentPanels";
 import { Empty, Field } from "./Field";
 import { ImagePicker, Thumbnail } from "./ImagePicker";
 import { AccountPanel, SiteDetailsPanel, SiteImagesPanel, SkillsPanel } from "./StudioPanels";
 
-type Tab = "home" | "notices" | "posts" | "images" | "projects" | "skills" | "applications" | "details" | "account";
+type Tab = "home" | "notices" | "posts" | "images" | "services" | "text" | "sections" | "projects" | "skills" | "applications" | "details" | "account";
 
 const SITE_LABEL: Record<SiteStatus, string> = {
   STRUCTURAL_WORK: "Structural work",
@@ -107,6 +111,7 @@ type StudioSnapshot = {
   skills: AdminSkill[];
   applications: AdminApplication[];
   settings: SiteSettings;
+  services: AdminService[];
 };
 
 let studioRequest: Promise<StudioSnapshot> | null = null;
@@ -121,6 +126,7 @@ function loadStudio(): Promise<StudioSnapshot> {
     const skills = await getAdminSkills();
     const applications = await getAdminApplications();
     const settings = await getSiteSettings();
+    const services = await getAdminServices();
     return {
       email: me.data.email,
       notices: notices.data,
@@ -130,6 +136,7 @@ function loadStudio(): Promise<StudioSnapshot> {
       skills,
       applications,
       settings,
+      services,
     };
   })();
   studioRequest = request;
@@ -152,7 +159,8 @@ export function AdminConsole() {
   const [sites, setSites] = useState<Site[]>([]);
   const [skills, setSkills] = useState<AdminSkill[]>([]);
   const [applications, setApplications] = useState<AdminApplication[]>([]);
-  const [settings, setSettings] = useState<SiteSettings>({ contact: { phone: "", email: "", address: "" }, images: {} });
+  const [settings, setSettings] = useState<SiteSettings>(EMPTY_SETTINGS);
+  const [services, setServices] = useState<AdminService[]>([]);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -175,6 +183,7 @@ export function AdminConsole() {
         setSkills(studio.skills);
         setApplications(studio.applications);
         setSettings(studio.settings);
+        setServices(studio.services);
         setReady(true);
       })
       .catch(() => {
@@ -231,7 +240,19 @@ export function AdminConsole() {
     },
     posts: {
       title: "Work photos",
-      lead: "These photos appear in the portfolio slider. The first living-room photo is shown first.",
+      lead: "These photos appear in the portfolio slider and gallery, in this order. Use the arrows to move them.",
+    },
+    services: {
+      title: "Services",
+      lead: "The services listed on the homepage, in both languages. Use the arrows to change the order.",
+    },
+    text: {
+      title: "Website text",
+      lead: "Every sentence and button on the public site, in Amharic and English. Open a part of the site or search for a word.",
+    },
+    sections: {
+      title: "Homepage sections",
+      lead: "Hide a section you are not ready to show. Its menu link is hidden too.",
     },
     images: {
       title: "Site images",
@@ -271,6 +292,9 @@ export function AdminConsole() {
           <NavButton current={tab} id="notices" icon={<Bell size={16} />} label="Messages" count={unread} onSelect={setTab} />
           <NavButton current={tab} id="posts" icon={<Images size={16} />} label="Work photos" count={posts.length} onSelect={setTab} />
           <NavButton current={tab} id="images" icon={<ImageIcon size={16} />} label="Site images" onSelect={setTab} />
+          <NavButton current={tab} id="services" icon={<Hammer size={16} />} label="Services" count={services.length} onSelect={setTab} />
+          <NavButton current={tab} id="text" icon={<Type size={16} />} label="Website text" onSelect={setTab} />
+          <NavButton current={tab} id="sections" icon={<LayoutList size={16} />} label="Homepage sections" onSelect={setTab} />
           <NavButton current={tab} id="projects" icon={<FolderKanban size={16} />} label="Projects" count={sites.length} onSelect={setTab} />
           <NavButton current={tab} id="skills" icon={<Wrench size={16} />} label="Skills" onSelect={setTab} />
           <NavButton current={tab} id="applications" icon={<Briefcase size={16} />} label="Applications" count={waiting} onSelect={setTab} />
@@ -339,6 +363,23 @@ export function AdminConsole() {
               onSaved={(message) => note(message)}
               onChange={async () => setPosts(await getAdminPosts())}
             />
+          ) : null}
+          {tab === "services" ? (
+            <ServicesPanel
+              services={services}
+              onError={setError}
+              onSaved={note}
+              onChange={(next) => {
+                setServices(next);
+                changeSettings({ ...settings, services: next.filter((service) => service.published) });
+              }}
+            />
+          ) : null}
+          {tab === "text" ? (
+            <WebsiteTextPanel settings={settings} onChange={changeSettings} onError={setError} onSaved={note} />
+          ) : null}
+          {tab === "sections" ? (
+            <SectionsPanel settings={settings} onChange={changeSettings} onError={setError} onSaved={note} />
           ) : null}
           {tab === "images" ? (
             <SiteImagesPanel settings={settings} onChange={changeSettings} onError={setError} onSaved={note} />
@@ -621,6 +662,16 @@ function PostEditor({
     return posts.filter((post) => `${post.title} ${post.description} ${post.category}`.toLowerCase().includes(q));
   }, [posts, query]);
 
+  async function move(from: number, to: number) {
+    onError("");
+    try {
+      await reorderPosts(moved(posts, from, to).map((post) => post.id));
+      await onChange();
+    } catch (err) {
+      onError(errorMessage(err, "The order could not be saved."));
+    }
+  }
+
   function edit(post: WorkPost) {
     setEditing(post.id);
     setDraft({
@@ -692,7 +743,7 @@ function PostEditor({
         <input className="field mb-4" placeholder="Search photos" value={query} onChange={(event) => setQuery(event.target.value)} />
         {visible.length === 0 ? <Empty>No photos match this search.</Empty> : (
           <ul className="divide-y divide-line rounded-lg border border-line bg-surface">
-            {visible.map((post) => (
+            {visible.map((post, index) => (
               <li key={post.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
                   <Thumbnail src={post.imageUrl} className="h-14 w-20" />
@@ -704,7 +755,10 @@ function PostEditor({
                     </p>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {query.trim() ? null : (
+                    <MoveButtons index={index} count={posts.length} label={post.title} onMove={(from, to) => void move(from, to)} />
+                  )}
                   <button type="button" className="rounded-md border border-line px-3 py-2 text-sm" onClick={() => edit(post)}>Edit</button>
                   <button
                     type="button"

@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { NAV_ITEMS } from "@/lib/brand";
+import { useNavItems } from "@/hooks/useNavItems";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import { cn } from "@/lib/utils";
-
-const NAV_KEYS = ["home", "services", "work", "projects", "about", "contact"] as const;
 
 type Props = {
   open: boolean;
@@ -17,6 +15,7 @@ type Props = {
 export function NavOverlay({ open, onClose }: Props) {
   const reduce = useReducedMotion();
   const { locale, setLocale, t } = useI18n();
+  const navItems = useNavItems();
   const active = useActiveSection();
 
   return (
@@ -34,7 +33,7 @@ export function NavOverlay({ open, onClose }: Props) {
         >
           <span className="absolute inset-y-0 left-0 w-px bg-gold" aria-hidden />
           <nav className="flex flex-col py-2">
-            {NAV_ITEMS.map((item, index) => (
+            {navItems.map((item, index) => (
               <motion.div
                 key={item.href}
                 initial={reduce ? false : { opacity: 0, x: 12 }}
@@ -45,17 +44,17 @@ export function NavOverlay({ open, onClose }: Props) {
                   href={item.href}
                   role="menuitem"
                   onClick={onClose}
-                  aria-current={active === NAV_KEYS[index] ? "page" : undefined}
+                  aria-current={active === item.key ? "page" : undefined}
                   className="group flex items-center gap-3 px-5 py-2.5 transition-colors duration-200 hover:bg-white/6"
                 >
                   <span className="w-5 text-[10px] tracking-[0.16em] text-gold">{item.index}</span>
                   <span
                     className={cn(
                       "text-[13px] tracking-wide transition-transform duration-200 group-hover:translate-x-1",
-                      active === NAV_KEYS[index] && "underline decoration-gold decoration-1 underline-offset-4",
+                      active === item.key && "underline decoration-gold decoration-1 underline-offset-4",
                     )}
                   >
-                    {t.nav[NAV_KEYS[index]]}
+                    {t.nav[item.key]}
                   </span>
                 </Link>
               </motion.div>

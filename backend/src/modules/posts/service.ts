@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../middleware/error";
-import { POST_CATEGORIES, fieldErrors, imageUrlSchema, slugFromTitle } from "../../utils/content";
+import { POST_CATEGORIES, fieldErrors, imageUrlSchema, reorderSchema, slugFromTitle } from "../../utils/content";
 import { z } from "zod";
 
 const UUID_PATTERN =
@@ -43,7 +43,7 @@ function toPost(row: {
 export async function listPosts(publishedOnly: boolean) {
   const rows = await prisma.post.findMany({
     where: publishedOnly ? { published: true } : undefined,
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
   return { data: rows.map(toPost) };
 }
@@ -89,6 +89,17 @@ export async function updatePost(postId: string, body: unknown) {
     },
   });
   return { data: toPost(row) };
+}
+
+export async function reorderPosts(body: unknown) {
+  const parsed = reorderSchema.safeParse(body);
+  if (!parsed.success) throw new AppError(400, "Validation failed", fieldErrors(parsed.error));
+  await prisma.$transaction(
+    parsed.data.ids.map((id, index) =>
+      prisma.post.updateMany({ where: { id }, data: { sortOrder: index + 1 } }),
+    ),
+  );
+  return listPosts(false);
 }
 
 export async function deletePost(postId: string) {

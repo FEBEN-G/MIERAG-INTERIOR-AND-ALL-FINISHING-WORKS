@@ -27,7 +27,8 @@ export function Portfolio() {
   useEffect(() => {
     if (!isApiConfigured()) return;
     getPublishedPosts()
-      .then((posts) => setFeatured(orderRooms(posts.map(toGalleryItem))))
+      // The admin sets the order of live photos.
+      .then((posts) => setFeatured(posts.map(toGalleryItem)))
       .catch(() => undefined);
   }, []);
 

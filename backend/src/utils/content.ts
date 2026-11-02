@@ -32,6 +32,11 @@ export function slugFromTitle(title: string, fallback = "post") {
   return `${base || fallback}-${suffix}`;
 }
 
+/** Body of a reorder request: every id, in the new display order. */
+export const reorderSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(500),
+});
+
 export function fieldErrors(error: z.ZodError) {
   const fields: Record<string, string> = {};
   for (const issue of error.issues) {

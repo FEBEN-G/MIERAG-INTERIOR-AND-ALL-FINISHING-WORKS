@@ -50,6 +50,8 @@ model Site {
   requiredSkills         SiteRequiredSkill[]
   applications           Application[]
 
+  @@index([status, createdAt])
+  @@index([createdAt])
   @@map("sites")
 }
 
@@ -72,26 +74,31 @@ model SiteRequiredSkill {
   skillCategory   SkillCategory @relation(fields: [skillCategoryId], references: [id], onDelete: Cascade)
 
   @@id([siteId, skillCategoryId])
+  @@index([skillCategoryId])
   @@map("site_required_skills")
 }
 
 model Application {
-  id                   String                 @id @default(uuid()) @db.Uuid
-  siteId               String                 @db.Uuid
+  id                   String                @id @default(uuid()) @db.Uuid
+  siteId               String                @db.Uuid
   fullName             String
   phoneNumber          String
-  skillCategoryId      String                 @db.Uuid
+  skillCategoryId      String                @db.Uuid
   expectedRate         Int
   experienceYears      Int
   experienceDetails    String?
-  status               ApplicationStatus      @default(PENDING)
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  site                 Site                   @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  skillCategory        SkillCategory          @relation(fields: [skillCategoryId], references: [id])
+  status               ApplicationStatus     @default(PENDING)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  site                 Site                  @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  skillCategory        SkillCategory         @relation(fields: [skillCategoryId], references: [id])
   notificationFailures NotificationFailure[]
+  notice               AdminNotice?
 
   @@index([siteId, phoneNumber])
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([skillCategoryId])
   @@map("applications")
 }
 
@@ -100,6 +107,7 @@ model Admin {
   email        String   @unique
   passwordHash String
   role         String   @default("ADMIN")
+  tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
 
   @@map("admins")
@@ -114,9 +122,11 @@ model Post {
   imageUrl    String
   published   Boolean  @default(true)
   customized  Boolean  @default(false)
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([published, sortOrder])
   @@map("posts")
 }
 
@@ -129,20 +139,24 @@ model Inquiry {
   createdAt DateTime     @default(now())
   notice    AdminNotice?
 
+  @@index([createdAt])
   @@map("inquiries")
 }
 
 model AdminNotice {
-  id        String     @id @default(uuid()) @db.Uuid
-  kind      NoticeKind
-  title     String
-  body      String
-  read      Boolean    @default(false)
-  inquiryId String?    @unique @db.Uuid
-  inquiry   Inquiry?   @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
-  createdAt DateTime   @default(now())
+  id            String       @id @default(uuid()) @db.Uuid
+  kind          NoticeKind
+  title         String
+  body          String
+  read          Boolean      @default(false)
+  inquiryId     String?      @unique @db.Uuid
+  inquiry       Inquiry?     @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  applicationId String?      @unique @db.Uuid
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
 
   @@index([read, createdAt])
+  @@index([createdAt])
   @@map("admin_notices")
 }
 
@@ -153,7 +167,25 @@ model NotificationFailure {
   createdAt     DateTime    @default(now())
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
+  @@index([applicationId])
   @@map("notification_failures")
+}
+
+model Service {
+  id            String   @id @default(uuid()) @db.Uuid
+  slug          String   @unique
+  titleAm       String
+  titleEn       String
+  descriptionAm String
+  descriptionEn String
+  imageUrl      String
+  published     Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([published, sortOrder])
+  @@map("services")
 }
 
 model SiteSetting {

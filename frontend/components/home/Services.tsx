@@ -1,19 +1,38 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { SiteImage } from "@/components/ui/SiteImage";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { services } from "@/lib/data/services";
 import { useI18n } from "@/components/i18n/LanguageProvider";
 import { PreviewNote } from "@/components/ui/PreviewNote";
-import type { ImageSlot } from "@/lib/site-images";
+import { useSiteSettings } from "@/lib/site-settings";
 import { SectionMark } from "@/components/ui/SectionMark";
-import { cn } from "@/lib/utils";
+import { cn, isUploadedImage } from "@/lib/utils";
 
 const shapes = ["shape-a", "shape-b", "shape-c"] as const;
 
 export function Services() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
+  const { ready, settings } = useSiteSettings();
+
+  // Live services come from the studio; the built-in list covers preview mode and the first paint.
+  const items = settings.services
+    ? settings.services.map((service) => ({
+        id: service.id,
+        title: locale === "am" ? service.titleAm : service.titleEn,
+        description: locale === "am" ? service.descriptionAm : service.descriptionEn,
+        src: service.imageUrl,
+        alt: service.titleAm,
+      }))
+    : services.map((service) => ({
+        id: service.id,
+        ...t.services.items[service.id as keyof typeof t.services.items],
+        src: service.image.src,
+        alt: service.image.alt,
+      }));
+
+  if (items.length === 0) return null;
 
   return (
     <section id="services" className="relative overflow-hidden bg-ivory px-4 pt-24 pb-16 sm:px-6 sm:pt-28 md:px-10 md:pt-40 md:pb-28">
@@ -39,12 +58,11 @@ export function Services() {
       </motion.div>
 
       <div className="mx-auto mt-16 flex max-w-6xl flex-col gap-6">
-        {services.map((service, index) => {
+        {items.map((item, index) => {
           const imageRight = index % 2 === 0;
-          const item = t.services.items[service.id as keyof typeof t.services.items];
           return (
             <motion.article
-              key={service.id}
+              key={item.id}
               className="group grid grid-cols-1 items-center gap-6 py-8 sm:grid-cols-2 sm:gap-12 md:py-12"
               initial={{ opacity: 0, y: 48 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +70,7 @@ export function Services() {
               transition={{ duration: 0.75, delay: 0.05 }}
             >
               <div className={cn(imageRight ? "sm:order-1" : "sm:order-2 sm:text-right")}>
-                <span className="font-display text-4xl font-light text-ink/15">{service.number}</span>
+                <span className="font-display text-4xl font-light text-ink/15">{String(index + 1).padStart(2, "0")}</span>
                 <h3 className="mt-3 text-xl tracking-tight text-balance sm:text-2xl">{item.title}</h3>
                 <p className={cn("mt-3 text-base leading-8 text-ink/85", imageRight ? "max-w-sm" : "sm:ml-auto sm:max-w-sm")}>
                   {item.description}
@@ -60,8 +78,9 @@ export function Services() {
               </div>
               <div className={cn(imageRight ? "sm:order-2" : "sm:order-1")}>
                 <ServiceFrame
-                  slot={`service-${service.id}` as ImageSlot}
-                  alt={service.image.alt}
+                  src={item.src}
+                  alt={item.alt}
+                  hidden={!ready}
                   shape={shapes[index % shapes.length]}
                   notch={index % 2 === 0}
                   delay={index * 0.35}
@@ -76,14 +95,16 @@ export function Services() {
 }
 
 function ServiceFrame({
-  slot,
+  src,
   alt,
+  hidden,
   shape,
   notch,
   delay,
 }: {
-  slot: ImageSlot;
+  src: string;
   alt: string;
+  hidden: boolean;
   shape: (typeof shapes)[number];
   notch: boolean;
   delay: number;
@@ -119,14 +140,16 @@ function ServiceFrame({
         )}
         style={notch ? { clipPath: "url(#photo-notch)" } : undefined}
       >
-        <SiteImage
-          slot={slot}
+        <Image
+          src={src}
+          unoptimized={isUploadedImage(src)}
           alt={alt}
           fill
           sizes="(max-width: 640px) 100vw, 46vw"
           className="object-cover"
           style={{
             transform: `scale(${shift.scale}) translate3d(${shift.x}px, ${shift.y}px, 0)`,
+            visibility: hidden ? "hidden" : undefined,
             transition: "transform 0.35s ease-out",
           }}
         />

@@ -15,7 +15,7 @@ export function ContactCinematic() {
   const rootRef = useRef<HTMLElement>(null);
   const { t } = useI18n();
   const { ready, settings } = useSiteSettings();
-  const { phone, email, address } = settings.contact;
+  const { phone, email, address, companyName } = settings.contact;
 
   useEffect(() => {
     const { gsap } = registerGsap();
@@ -86,7 +86,7 @@ export function ContactCinematic() {
           ))}
         </h2>
         <p className="on-photo contact-cta mt-8 max-w-lg text-sm text-paper">
-          {BRAND.name}
+          {companyName || BRAND.name}
         </p>
         <p className="on-photo contact-cta mt-2 text-sm text-gold-bright">
           {t.hero.lines.join(" ")}

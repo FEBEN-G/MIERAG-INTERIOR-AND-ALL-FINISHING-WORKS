@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { am, en, type Dictionary } from "@/lib/i18n/dictionary";
+import { useSiteSettings } from "@/lib/site-settings";
+import { applyTextOverrides } from "@/lib/text-overrides";
 
 export type Locale = "en" | "am";
 
@@ -43,6 +45,8 @@ function setLocale(locale: Locale) {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const locale = useSyncExternalStore(subscribe, readLocale, () => DEFAULT_LOCALE);
+  const { settings } = useSiteSettings();
+  const overrides = settings.text[locale];
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -52,9 +56,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     () => ({
       locale,
       setLocale,
-      t: locale === "am" ? am : en,
+      t: applyTextOverrides(locale === "am" ? am : en, overrides),
     }),
-    [locale],
+    [locale, overrides],
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
